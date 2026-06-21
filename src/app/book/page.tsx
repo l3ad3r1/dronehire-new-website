@@ -1,8 +1,8 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { MapPin, Calendar, ChevronRight, Star, Shield, AlertTriangle, XCircle, CheckCircle, RefreshCw, Phone } from "lucide-react";
+import { useEffect, useRef, useState, useCallback, type KeyboardEvent } from "react";
+import { MapPin, Calendar, ChevronRight, Star, Shield, AlertTriangle, XCircle, CheckCircle, RefreshCw, Phone, Search, Loader2 } from "lucide-react";
 import { FACILITIES } from "@/data/facilities";
 import { generateZoneGeoJSON, checkPointZone } from "@/lib/airspace";
 import type { ZoneCheckResult } from "@/lib/airspace";
@@ -98,10 +98,14 @@ export default function BookPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const pinMarkerRef = useRef<any>(null);
+  const mapLibreRef = useRef<any>(null);
 
   const [step, setStep] = useState<Step>(1);
   const [selectedService, setSelectedService] = useState<typeof SERVICES[0] | null>(null);
   const [location, setLocation] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationSearching, setLocationSearching] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [date, setDate] = useState("");
   const [today, setToday] = useState("");
@@ -111,6 +115,50 @@ export default function BookPage() {
   const [booked, setBooked] = useState(false);
 
   useEffect(() => { setToday(new Date().toISOString().split("T")[0]); }, []);
+
+  // Place a pin on the map at given coords
+  const placePin = useCallback((lat: number, lng: number) => {
+    const maplibregl = mapLibreRef.current;
+    const map = mapInstanceRef.current;
+    if (!maplibregl || !map) return;
+    if (pinMarkerRef.current) {
+      pinMarkerRef.current.setLngLat([lng, lat]);
+    } else {
+      const el = document.createElement("div");
+      el.innerHTML = `<svg viewBox="0 0 24 36" width="28" height="42" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#ff5500"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
+      el.style.cssText = "cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))";
+      pinMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "bottom" })
+        .setLngLat([lng, lat])
+        .addTo(map);
+    }
+  }, []);
+
+  // Forward geocode: type an address → fly map there + drop pin
+  const forwardGeocode = useCallback(async (query: string) => {
+    if (!query.trim()) return;
+    setLocationSearching(true);
+    setLocationError("");
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Hyderabad, India")}&limit=1`,
+        { headers: { "User-Agent": "DroneHire/1.0" } }
+      );
+      const data = await res.json();
+      if (!data.length) { setLocationError("Location not found — try a landmark or area name"); return; }
+      const lat = parseFloat(data[0].lat);
+      const lng = parseFloat(data[0].lon);
+      const label = data[0].display_name.split(",")[0];
+      mapInstanceRef.current?.flyTo({ center: [lng, lat], zoom: 15, speed: 1.4 });
+      placePin(lat, lng);
+      setCoords({ lat, lng });
+      setLocation(`${label}, Hyderabad`);
+      setLocationQuery(`${label}, Hyderabad`);
+    } catch {
+      setLocationError("Search failed — try clicking the map instead");
+    } finally {
+      setLocationSearching(false);
+    }
+  }, [placePin]);
 
   // Zone check when coords change
   useEffect(() => {
@@ -142,6 +190,7 @@ export default function BookPage() {
 
     (async () => {
       const maplibregl = (await import("maplibre-gl")).default;
+      mapLibreRef.current = maplibregl;
 
       map = new maplibregl.Map({
         container: mapRef.current!,
@@ -232,19 +281,7 @@ export default function BookPage() {
         // Map click → pin location
         map.on("click", (e: any) => {
           const { lng, lat } = e.lngLat;
-
-          // Move or create pin marker
-          if (pinMarkerRef.current) {
-            pinMarkerRef.current.setLngLat([lng, lat]);
-          } else {
-            const el = document.createElement("div");
-            el.innerHTML = `<svg viewBox="0 0 24 36" width="28" height="42" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#111"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
-            el.style.cssText = "cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))";
-            pinMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "bottom" })
-              .setLngLat([lng, lat])
-              .addTo(map);
-          }
-
+          placePin(lat, lng);
           setCoords({ lat, lng });
           reverseGeocode(lat, lng);
         });
@@ -254,7 +291,7 @@ export default function BookPage() {
     return () => {
       if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
     };
-  }, [reverseGeocode]);
+  }, [reverseGeocode, placePin]);
 
   // Searching animation
   useEffect(() => {
@@ -323,16 +360,35 @@ export default function BookPage() {
           {/* STEP 1 */}
           {step === 1 && (
             <>
-              {/* Location from map click */}
+              {/* Location search */}
               <div>
                 <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase mb-1.5">Shoot Location</p>
-                <div className={`flex items-center gap-2.5 border px-3 h-11 transition-colors ${coords ? "border-primary bg-primary/5" : "border-dashed border-border bg-background"}`}>
-                  <MapPin className={`w-4 h-4 flex-shrink-0 ${coords ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className={`text-sm flex-1 truncate ${coords ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                    {location || "Click on the map to pin your location"}
-                  </span>
-                  {coords && <span className="font-mono text-[10px] text-muted-foreground">{coords.lat.toFixed(3)},{coords.lng.toFixed(3)}</span>}
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={locationQuery}
+                      onChange={(e) => { setLocationQuery(e.target.value); setLocationError(""); }}
+                      onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => { if (e.key === "Enter") forwardGeocode(locationQuery); }}
+                      placeholder="Type area, landmark or address…"
+                      className="w-full h-11 pl-9 pr-3 border border-border bg-card text-sm focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <button
+                    onClick={() => forwardGeocode(locationQuery)}
+                    disabled={locationSearching}
+                    className="h-11 px-3 bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-60"
+                  >
+                    {locationSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  </button>
                 </div>
+                {locationError && <p className="font-mono text-[10px] text-red-500 mt-1 tracking-wide">{locationError}</p>}
+                {coords && (
+                  <p className="font-mono text-[10px] text-primary mt-1 tracking-wide">
+                    ✓ Pinned — or click the map to adjust
+                  </p>
+                )}
               </div>
 
               {/* Zone status */}
