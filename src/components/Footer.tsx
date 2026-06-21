@@ -9,7 +9,7 @@ export function Footer() {
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-white/60">Ground Control · Online</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-12">
           <div className="col-span-2">
             <div className="font-display text-sm font-bold tracking-[0.2em] uppercase text-white">DRONEHIRE</div>
             <p className="text-sm text-white/50 max-w-xs leading-relaxed mt-4">{FOOTER_TAGLINE}</p>

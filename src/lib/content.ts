@@ -230,6 +230,13 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     ],
   },
   {
+    title: "Platform",
+    links: [
+      { label: "Airspace Map", href: "/map" },
+      { label: "Drone Sim", href: "/game" },
+    ],
+  },
+  {
     title: "Contact",
     links: [
       { label: "WhatsApp", href: WHATSAPP_URL },

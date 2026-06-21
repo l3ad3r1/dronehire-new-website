@@ -11,12 +11,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { NAV_LINKS, WHATSAPP_URL, FAQS } from "@/lib/content";
 
-const HOME_NAV_LINKS = [
-  ...NAV_LINKS,
-  { label: "Book a Drone", href: "/book" },
-  { label: "Airspace Map", href: "/map" },
-  { label: "Drone Game", href: "/game" },
-];
+const HOME_NAV_LINKS = [...NAV_LINKS];
 
 function PlatformSection() {
   return (
@@ -79,9 +74,9 @@ export default function HomePage() {
     <div className="min-h-screen overflow-x-hidden">
       <Navbar
         links={HOME_NAV_LINKS}
-        ctaLabel="Book on WhatsApp →"
-        ctaHref={WHATSAPP_URL}
-        ctaExternal={true}
+        ctaLabel="Book a Drone →"
+        ctaHref="/book"
+        ctaExternal={false}
       />
       <AltitudeHud />
       <main>
