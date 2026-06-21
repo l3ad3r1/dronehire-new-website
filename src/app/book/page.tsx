@@ -12,7 +12,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 const BOOK_NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Airspace Map", href: "/map" },
-  { label: "Drone Game", href: "/game" },
+  { label: "Drone Sim", href: "/game" },
   { label: "Fly with us", href: "/pilots" },
 ];
 
@@ -291,12 +291,7 @@ export default function BookPage() {
 
   return (
     <>
-    <Navbar
-      links={BOOK_NAV_LINKS}
-      ctaLabel="Back to Home →"
-      ctaHref="/"
-      ctaExternal={false}
-    />
+    <Navbar links={BOOK_NAV_LINKS} hideCta={true} />
     <WhatsAppButton />
     <div className="flex" style={{ height: "calc(100vh - 64px)" }}>
       {/* Left panel */}
