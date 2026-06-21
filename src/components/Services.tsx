@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SERVICES } from "@/lib/content";
 
 const FILTERS = ["All", "Real estate", "Weddings", "Construction", "Corporate"];
@@ -17,6 +17,21 @@ function matchesFilter(title: string, filter: string) {
 
 export function Services() {
   const [active, setActive] = useState("All");
+
+  useEffect(() => {
+    function onFilter(e: Event) {
+      const label = (e as CustomEvent<string>).detail;
+      const mapped: Record<string, string> = {
+        "Real estate": "Real estate",
+        "Weddings": "Weddings",
+        "Construction": "Construction",
+        "Events": "Corporate",
+      };
+      setActive(mapped[label] ?? "All");
+    }
+    window.addEventListener("dh:filter", onFilter);
+    return () => window.removeEventListener("dh:filter", onFilter);
+  }, []);
   const visible = SERVICES.filter((s) => matchesFilter(s.title, active));
 
   return (

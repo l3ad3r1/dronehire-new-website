@@ -120,7 +120,17 @@ export function Hero() {
             </p>
             <div className="flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "0.24s" }}>
               {HERO_TAGS.map((tag) => (
-                <a key={tag.label} href="#services" className="px-4 py-2 bg-foreground/5 border border-border/50 font-mono text-xs tracking-wider text-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer select-none">{tag.emoji} {tag.label}</a>
+                <button
+                  key={tag.label}
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("dh:filter", { detail: tag.label }));
+                    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="px-4 py-2 bg-foreground/5 border border-border/50 font-mono text-xs tracking-wider text-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer select-none"
+                >
+                  {tag.emoji} {tag.label}
+                </button>
               ))}
             </div>
           </div>

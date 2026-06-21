@@ -55,7 +55,7 @@ export const PROCESS_STEPS: ProcessStep[] = [
 export const STATS: StatItem[] = [
   { value: "DGCA", description: "Every pilot is certified and legally cleared to fly" },
   { value: "48h", description: "Edited footage delivered after your shoot" },
-  { value: "50/50", description: "Half now, half after the shoot" },
+  { value: "50/50", description: "50% to book your pilot — balance after you approve the preview" },
   { value: "4K", description: "Cinema-grade footage as standard" },
 ];
 
@@ -206,7 +206,7 @@ export const FAQS: FaqItem[] = [
   {
     question: "What if I'm not happy with the footage?",
     answer:
-      "Your balance payment is due only after you receive the edited footage and confirm you're satisfied. If there's a specific issue, we'll work with the pilot to address it or arrange a reshoot where feasible.",
+      "We send you a watermarked low-res preview before your final payment is due. Your 50% balance is paid only after you've approved the preview. If there's a quality issue, we'll arrange a reshoot or adjustment — you never pay the balance for footage you haven't signed off on.",
   },
   {
     question: "Which areas of Hyderabad do you cover?",
