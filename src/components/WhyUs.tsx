@@ -10,7 +10,7 @@ export function WhyUs() {
               <div className="h-px w-8 bg-primary" />
               <span className="font-mono text-[10px] tracking-[0.3em] text-primary uppercase">Why DroneHire</span>
             </div>
-            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-6">WE ONLY WORK WITH PILOTS YOU CAN TRUST</h2>
+            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-6">THREE WAYS MOST DRONE SHOOTS FAIL — AND HOW WE PREVENT THEM</h2>
             <p className="text-base text-white/70 leading-relaxed mb-10">{WHY_INTRO}</p>
             <div className="space-y-6">
               {WHY_POINTS.map((pt) => (

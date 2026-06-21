@@ -19,7 +19,7 @@ export const NAV_LINKS: NavLink[] = [
   { label: "Services", href: "#services" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
-  { label: "Fly with us", href: "/pilots" },
+  { label: "Pilot network", href: "/pilots" },
 ];
 
 export const SHOOT_TYPES = ["Real estate", "Weddings", "Construction", "Events"];
@@ -48,7 +48,7 @@ export const PROCESS_STEPS: ProcessStep[] = [
     number: "03",
     title: "Receive your footage",
     description:
-      "Edited aerial photos and 4K video delivered within 48 hours of the shoot. Balance paid only after you're satisfied.",
+      "Edited aerial photos and 4K video delivered within 48 hours. The 50% balance is due only after you approve the watermarked preview.",
   },
 ];
 
@@ -107,12 +107,12 @@ export const SERVICES: Service[] = [
 ];
 
 export const WHY_INTRO =
-  "Every pilot on DroneHire carries a DGCA Remote Pilot Certificate and knows Hyderabad's no-fly zones, permission windows, and local conditions. You get dependable, professional results from a licensed pilot who handles the airspace and the paperwork — not an unlicensed operator winging it.";
+  "Most drone shoots in Hyderabad fail for three reasons: an unlicensed operator, a police stop mid-flight, or shaky phone-sensor footage. DroneHire eliminates all three — before your shoot even starts.";
 
 export const WHY_POINTS: TrustPoint[] = [
-  { title: "DGCA-licensed", description: "Every pilot is certified and legally cleared to fly" },
-  { title: "Fast delivery", description: "Edited footage delivered — no chasing, no delays" },
-  { title: "Pay on satisfaction", description: "Advance only — balance after you're happy with the footage" },
+  { title: "Zero police shutdowns", description: "We pull automated digital red-zone clearances before every flight so your shoot isn't paused by local authorities mid-session." },
+  { title: "No rogue flyaways", description: "Enterprise DJI hardware calibrated weekly, backed by ₹1 Cr third-party liability coverage — not a hobbyist drone from Amazon." },
+  { title: "True 10-bit cinema delivery", description: "No blown-out phone-sensor footage. Strictly D-Log / ProRes 4K files, colour-graded and stabilised for your final edit." },
 ];
 
 export const PRICING_TIERS: PricingTier[] = [
@@ -152,6 +152,19 @@ export const PRICING_TIERS: PricingTier[] = [
       "Stakeholder-ready reports",
       "Bulk shoot discounts",
       "Dedicated pilot assignment",
+    ],
+  },
+  {
+    name: "Corporate & events",
+    price: "₹25,000+",
+    description:
+      "Custom day rates for product launches, campus flyovers, open-air concerts, and B2B events across Hyderabad.",
+    features: [
+      "Full-day pilot assignment",
+      "4K cinema-grade video",
+      "Multiple locations & angles",
+      "Priority scheduling",
+      "Custom post-processing",
     ],
   },
 ];
@@ -226,7 +239,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "How it works", href: "/#how" },
       { label: "Pricing", href: "/#pricing" },
       { label: "FAQ", href: "/#faq" },
-      { label: "Fly with us", href: "/pilots" },
+      { label: "Pilot network", href: "/pilots" },
     ],
   },
   {

@@ -28,7 +28,7 @@ function PlatformSection() {
           <a href="/book" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
             <div className="text-3xl mb-4">📍</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              Book a Pilot
+              Book a pilot
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
               Pin your shoot location on the map, check DGCA airspace zones, pick a service and pilot — book via WhatsApp in under 2 minutes.
@@ -41,7 +41,7 @@ function PlatformSection() {
           <a href="/map" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
             <div className="text-3xl mb-4">🗺️</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              Live Airspace Map
+              Live airspace map
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
               Interactive map of all 55+ Indian airports and facilities with real DGCA red/yellow zone overlays. Check before you fly.
@@ -54,7 +54,7 @@ function PlatformSection() {
           <a href="/game" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
             <div className="text-3xl mb-4">🎮</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              3D Drone Simulator
+              3D drone simulator
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
               Fly a drone over Hyderabad in our Three.js simulator. WASD controls, live telemetry HUD, AI tour guide, and custom scenarios.

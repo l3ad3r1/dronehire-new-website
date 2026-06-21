@@ -9,7 +9,7 @@ export function Pricing() {
           <span className="font-mono text-[10px] tracking-[0.3em] text-primary uppercase">Transparent pricing</span>
         </div>
         <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-10">SIMPLE, NO-SURPRISE RATES</h2>
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 items-start">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 items-start">
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.name}
