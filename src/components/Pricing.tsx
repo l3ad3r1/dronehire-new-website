@@ -44,16 +44,14 @@ export function Pricing() {
                 ))}
               </ul>
               <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/book"
                 className={`w-full h-11 flex items-center justify-center font-mono text-xs tracking-[0.15em] uppercase transition-colors ${
                   tier.popular
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "border border-border text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
-                Book on WhatsApp →
+                Book a Drone →
               </a>
             </div>
           ))}
