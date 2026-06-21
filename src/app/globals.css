@@ -1,0 +1,235 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-syncopate), sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-heading: var(--font-display);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --background: #fafafa;
+  --foreground: #121212;
+  --card: #ffffff;
+  --card-foreground: #121212;
+  --popover: #ffffff;
+  --popover-foreground: #121212;
+  --primary: #ff5500;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e3e4;
+  --secondary-foreground: #121212;
+  --muted: #e2e3e4;
+  --muted-foreground: #737373;
+  --accent: #ff5500;
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e2e3e4;
+  --input: #e2e3e4;
+  --ring: #ff5500;
+  --radius: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+    padding: 0;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .optical-bracket {
+    position: relative;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  .legal-prose {
+    color: var(--muted-foreground);
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+  .legal-prose > * + * {
+    margin-top: 1.25rem;
+  }
+  .legal-prose h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    font-size: 1.05rem;
+    color: var(--foreground);
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+  }
+  .legal-prose h3 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--foreground);
+  }
+  .legal-prose p {
+    color: var(--muted-foreground);
+  }
+  .legal-prose strong {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+  .legal-prose a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .legal-prose ul {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .legal-prose ul li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .legal-prose ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--primary);
+  }
+  .legal-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .legal-prose table th,
+  .legal-prose table td {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .legal-prose table th {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--foreground);
+    background: var(--secondary);
+  }
+  .legal-prose .contact-box {
+    margin-top: 3rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 1.75rem;
+  }
+  .legal-prose .contact-box h3 {
+    margin-bottom: 0.5rem;
+  }
+  .legal-prose .highlight-box {
+    border: 1px solid var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    padding: 1.5rem;
+  }
+  .legal-prose .highlight-box h3 {
+    margin-bottom: 0.5rem;
+  }
+  .legal-prose .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    height: 3rem;
+    padding: 0 1.5rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .legal-prose .cta-btn:hover {
+    background: color-mix(in srgb, var(--primary) 90%, black);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* MapLibre GL */
+.maplibregl-popup-content {
+  border-radius: 4px;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.maplibregl-popup-close-button { font-size: 16px; padding: 4px 8px; color: #666; }
+.maplibregl-ctrl-attrib { font-size: 10px !important; }
+
+/* Scrollbar */
+.overflow-y-auto::-webkit-scrollbar { width: 4px; }
+.overflow-y-auto::-webkit-scrollbar-track { background: transparent; }
+.overflow-y-auto::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
