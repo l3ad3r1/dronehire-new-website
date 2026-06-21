@@ -9,6 +9,7 @@ interface NavbarProps {
   ctaLabel?: string;
   ctaHref?: string;
   ctaExternal?: boolean;
+  hideCta?: boolean;
 }
 
 export function Navbar({
@@ -16,6 +17,7 @@ export function Navbar({
   ctaLabel = "Book a shoot →",
   ctaHref = WHATSAPP_URL,
   ctaExternal = true,
+  hideCta = false,
 }: NavbarProps) {
   const [open, setOpen] = useState(false);
 
@@ -26,13 +28,13 @@ export function Navbar({
           DRONEHIRE
         </a>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6">
+        {/* Desktop links — evenly spaced, uniform mono style */}
+        <div className="hidden md:flex items-center gap-8">
           {links.map((link) => (
             <a
               key={link.label}
               href={link.href}
-              className="font-mono text-xs tracking-wider text-white/65 hover:text-white transition-colors whitespace-nowrap"
+              className="font-mono text-xs tracking-[0.12em] text-white/65 hover:text-white transition-colors whitespace-nowrap"
             >
               {link.label}
             </a>
@@ -40,13 +42,15 @@ export function Navbar({
         </div>
 
         <div className="flex items-center gap-3">
-          <a
-            href={ctaHref}
-            {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-mono text-xs tracking-wider hover:bg-primary/90 transition-colors whitespace-nowrap"
-          >
-            {ctaLabel}
-          </a>
+          {!hideCta && (
+            <a
+              href={ctaHref}
+              {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-mono text-xs tracking-[0.12em] hover:bg-primary/90 transition-colors whitespace-nowrap"
+            >
+              {ctaLabel}
+            </a>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -69,19 +73,21 @@ export function Navbar({
               key={link.label}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="font-mono text-xs tracking-wider text-white/70 hover:text-white py-2.5 border-b border-white/5 last:border-0 transition-colors"
+              className="font-mono text-xs tracking-[0.12em] text-white/70 hover:text-white py-3 border-b border-white/5 last:border-0 transition-colors"
             >
               {link.label}
             </a>
           ))}
-          <a
-            href={ctaHref}
-            {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            onClick={() => setOpen(false)}
-            className="mt-3 w-full h-11 flex items-center justify-center bg-primary text-primary-foreground font-mono text-xs tracking-wider"
-          >
-            {ctaLabel}
-          </a>
+          {!hideCta && (
+            <a
+              href={ctaHref}
+              {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              onClick={() => setOpen(false)}
+              className="mt-3 w-full h-11 flex items-center justify-center bg-primary text-primary-foreground font-mono text-xs tracking-[0.12em]"
+            >
+              {ctaLabel}
+            </a>
+          )}
         </div>
       )}
     </nav>
