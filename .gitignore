@@ -1,4 +1,7 @@
-.next/
+﻿.next/
 node_modules/
 .env
 *.db
+dev.log
+.claude/
+*.log

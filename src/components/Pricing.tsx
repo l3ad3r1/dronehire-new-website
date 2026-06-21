@@ -51,7 +51,7 @@ export function Pricing() {
                     : "border border-border text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
-                Book a Drone →
+                Book a Drone Now →
               </a>
             </div>
           ))}
