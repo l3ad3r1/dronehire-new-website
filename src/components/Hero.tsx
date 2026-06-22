@@ -56,6 +56,9 @@ export function Hero() {
   const [submitted, setSubmitted] = useState(false);
   const [minDate, setMinDate] = useState("");
   const [dateError, setDateError] = useState("");
+  const [formError, setFormError] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
   const locationRef = useRef<HTMLInputElement>(null);
   const dateRef = useRef<HTMLInputElement>(null);
 
@@ -71,8 +74,17 @@ export function Hero() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const name = nameRef.current?.value.trim() ?? "";
+    const phone = phoneRef.current?.value ?? "";
     const location = locationRef.current?.value ?? "";
     const date = dateRef.current?.value ?? "";
+
+    // Require a name and a valid 10-digit WhatsApp number
+    if (!name || phone.replace(/\D/g, "").length < 10) {
+      setFormError("Please enter your name and a valid WhatsApp number.");
+      return;
+    }
+    setFormError("");
 
     // Reject any date earlier than tomorrow even if typed/pasted manually
     if (date && date < minDate) {
@@ -86,12 +98,14 @@ export function Hero() {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ formType: "quote", shootType, location, date }),
+        body: JSON.stringify({ formType: "quote", name, phone, shootType, location, date }),
       }).catch(() => {});
     }
 
     const lines = [
       `*New Quote Request — DroneHire*`,
+      `Name: ${name}`,
+      `WhatsApp: ${phone}`,
       `Shoot type: ${shootType}`,
       location ? `Location: ${location}` : "",
       date ? `Date: ${date}` : "",
@@ -195,6 +209,14 @@ export function Hero() {
                 <h2 className="font-display text-sm font-bold tracking-[0.15em] uppercase mb-6">Get a quote</h2>
                 <div className="space-y-5">
                   <div>
+                    <label className="block font-mono text-[11px] tracking-[0.2em] uppercase text-foreground/60 mb-2">Your name</label>
+                    <input ref={nameRef} type="text" placeholder="e.g. Ravi Kumar" onChange={() => formError && setFormError("")} className="w-full h-11 px-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block font-mono text-[11px] tracking-[0.2em] uppercase text-foreground/60 mb-2">WhatsApp number</label>
+                    <input ref={phoneRef} type="tel" inputMode="tel" placeholder="e.g. 98765 43210" onChange={() => formError && setFormError("")} className="w-full h-11 px-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors" />
+                  </div>
+                  <div>
                     <label className="block font-mono text-[11px] tracking-[0.2em] uppercase text-foreground/60 mb-2">Shoot type</label>
                     <ShootTypeSelect value={shootType} onChange={setShootType} />
                   </div>
@@ -207,6 +229,7 @@ export function Hero() {
                     <input ref={dateRef} type="date" min={minDate} onChange={() => dateError && setDateError("")} className="w-full h-11 px-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors" />
                     {dateError && <p className="mt-2 font-mono text-[11px] text-red-500">{dateError}</p>}
                   </div>
+                  {formError && <p className="font-mono text-[11px] text-red-500">{formError}</p>}
                   <button
                     type="submit"
                     className="w-full h-12 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center hover:bg-primary/90 transition-colors"

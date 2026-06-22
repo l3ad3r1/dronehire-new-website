@@ -22,8 +22,11 @@
 // First block (id..busyUntil) is what the booking page uses; the rest is the raw
 // application data captured from the signup form, kept for vetting.
 var PILOT_HEADERS   = ["id","name","phone","initials","color","rating","reviews","lat","lng","certs","status","createdAt","busyUntil","areas","dgca","experience","drone","shootTypes","notes"];
-var QUOTE_HEADERS   = ["createdAt","shootType","location","date"];
+var QUOTE_HEADERS   = ["createdAt","shootType","location","date","name","phone","stage","assignedTo"];
 var BOOKING_HEADERS = ["createdAt","customerName","phone","service","location","date","pilot","zone"];
+
+// Pipeline stages for the Quotes tab (shown as a dropdown on the "stage" column).
+var QUOTE_STAGES = ["Warm enquiry","Rate negotiation","Job accepted","Job rejected"];
 
 var PILOT_COLORS = ["#2563eb","#7c3aed","#0891b2","#db2777","#ea580c","#059669","#d97706","#4f46e5"];
 
@@ -58,9 +61,12 @@ function doPost(e) {
         break;
       case "quote":
       default:
-        sheet("Quotes", QUOTE_HEADERS).appendRow([
+        var qsh = sheet("Quotes", QUOTE_HEADERS);
+        qsh.appendRow([
           now, body.shootType || "", body.location || "", body.date || "",
+          body.name || "", body.phone || "", "Warm enquiry", "",
         ]);
+        applyStageValidation(qsh, qsh.getLastRow());   // new enquiries start as "Warm enquiry"
     }
     return json({ ok: true });
   } catch (err) {
@@ -189,22 +195,18 @@ function initials(name) {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+/** Get/create a tab and append any missing header columns (migrates older sheets). */
 function sheet(tabName, headers) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(tabName);
   if (!sh) {
     sh = ss.insertSheet(tabName);
     sh.appendRow(headers);
+    return sh;
   }
-  return sh;
-}
-
-/** Pilots sheet, appending any missing PILOT_HEADERS columns (migrates older sheets). */
-function pilotSheet() {
-  var sh = sheet("Pilots", PILOT_HEADERS);
   var lastCol = sh.getLastColumn();
   var header = sh.getRange(1, 1, 1, lastCol).getValues()[0];
-  PILOT_HEADERS.forEach(function (h) {
+  headers.forEach(function (h) {
     if (header.indexOf(h) === -1) {
       lastCol += 1;
       sh.getRange(1, lastCol).setValue(h);
@@ -212,6 +214,22 @@ function pilotSheet() {
     }
   });
   return sh;
+}
+
+function pilotSheet() { return sheet("Pilots", PILOT_HEADERS); }
+
+/** Apply the stage dropdown to the Quotes "stage" column (one row, or all rows if row omitted). */
+function applyStageValidation(sh, row) {
+  var head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  var col = head.indexOf("stage") + 1;
+  if (col < 1) return;
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(QUOTE_STAGES, true).setAllowInvalid(false).build();
+  if (row) {
+    sh.getRange(row, col).setDataValidation(rule);
+  } else {
+    sh.getRange(2, col, Math.max(sh.getMaxRows() - 1, 1), 1).setDataValidation(rule);
+  }
 }
 
 /** Normalise a cell (Date object or text) to a "yyyy-MM-dd" string. */
@@ -232,7 +250,7 @@ function json(obj) {
 // ── Run once to create tabs + seed the starter pilots ──────────────────────────
 
 function setup() {
-  sheet("Quotes", QUOTE_HEADERS);
+  applyStageValidation(sheet("Quotes", QUOTE_HEADERS));   // adds the stage dropdown
   sheet("Bookings", BOOKING_HEADERS);
   var sh = pilotSheet();
   if (sh.getLastRow() <= 1) {
