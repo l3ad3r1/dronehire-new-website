@@ -132,7 +132,22 @@ function appendPilot(body, now) {
   ]);
 }
 
-/** Geocode a free-text Hyderabad area to {lat,lng}, or null if it can't be resolved. */
+/**
+ * Run this once from the editor (select testGeocode, click Run).
+ * It triggers the Maps authorization prompt and logs the result so you can
+ * confirm geocoding works. Expect Vijayawada ≈ 16.50, 80.64.
+ */
+function testGeocode() {
+  var res = Maps.newGeocoder().setRegion("in").geocode("Vijayawada, India");
+  if (res && res.results && res.results.length) {
+    var loc = res.results[0].geometry.location;
+    Logger.log("OK -> " + loc.lat + ", " + loc.lng + "  (" + res.results[0].formatted_address + ")");
+  } else {
+    Logger.log("NO RESULT, status=" + (res && res.status));
+  }
+}
+
+/** Geocode a free-text area to {lat,lng}, or null if it can't be resolved. */
 function geocodeArea(areas) {
   if (!areas) return null;
   try {
