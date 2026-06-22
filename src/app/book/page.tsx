@@ -119,6 +119,8 @@ export default function BookPage() {
   const [zone, setZone] = useState<ZoneCheckResult | null>(null);
   const [appearedPilots, setAppearedPilots] = useState<Set<string>>(new Set());
   const [booked, setBooked] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
 
   // Pilots ranked by distance from the pinned location (nearest first).
   const rankedPilots = useMemo<RankedPilot[]>(() => {
@@ -364,6 +366,8 @@ export default function BookPage() {
         headers: { "Content-Type": "text/plain" },
         body: JSON.stringify({
           formType: "booking",
+          customerName,
+          phone: customerPhone,
           service: selectedService?.label ?? "",
           location,
           date,
@@ -382,6 +386,8 @@ export default function BookPage() {
 
   const waMessage = encodeURIComponent(
     `Hi, I want to book a ${selectedService?.label || "drone"} shoot.\n` +
+    (customerName ? `👤 Name: ${customerName}\n` : "") +
+    (customerPhone ? `📞 WhatsApp: ${customerPhone}\n` : "") +
     `📍 Location: ${location || "Hyderabad"}\n` +
     `📅 Date: ${date || "TBD"}\n` +
     `💰 Budget: ${selectedService ? inr(selectedService.price) : ""}+\n` +
@@ -580,10 +586,37 @@ export default function BookPage() {
                 ))}
               </div>
 
+              {/* Your details */}
+              {!booked && (
+                <div>
+                  <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase mb-2">Your Details</p>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Your name"
+                    className="w-full mb-2 px-3 py-2.5 border border-border bg-card text-sm focus:outline-none focus:border-primary transition-colors"
+                  />
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="WhatsApp number (e.g. 98765 43210)"
+                    className="w-full px-3 py-2.5 border border-border bg-card text-sm focus:outline-none focus:border-primary transition-colors"
+                  />
+                  <p className="font-mono text-[10px] text-muted-foreground/70 mt-1 tracking-wide">We&apos;ll confirm your shoot on this WhatsApp number.</p>
+                </div>
+              )}
+
               <div className="flex flex-col gap-2 mt-auto">
                 {!booked ? (
                   <>
-                    <button onClick={confirmBooking} className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+                    <button
+                      onClick={confirmBooking}
+                      disabled={!customerName.trim() || customerPhone.replace(/\D/g, "").length < 10}
+                      className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
                       Accept & Book <ChevronRight className="w-4 h-4" />
                     </button>
                     <button onClick={() => { setAppearedPilots(new Set()); setStep(2); }} className="w-full py-2.5 border border-border font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground flex items-center justify-center gap-2 hover:border-foreground transition-colors">
@@ -602,7 +635,7 @@ export default function BookPage() {
                       className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
                       <Phone className="w-4 h-4" /> Open WhatsApp
                     </a>
-                    <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
+                    <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); setCustomerName(""); setCustomerPhone(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
                       className="block w-full mt-2 text-xs text-gray-500 hover:text-gray-700 underline">
                       Start a new booking
                     </button>
