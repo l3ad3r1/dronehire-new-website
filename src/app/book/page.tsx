@@ -1,13 +1,15 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef, useState, useCallback, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo, type KeyboardEvent } from "react";
 import { MapPin, Calendar, ChevronRight, Star, Shield, AlertTriangle, XCircle, CheckCircle, RefreshCw, Phone, Search, Loader2 } from "lucide-react";
 import { FACILITIES } from "@/data/facilities";
 import { generateZoneGeoJSON, checkPointZone } from "@/lib/airspace";
 import type { ZoneCheckResult } from "@/lib/airspace";
 import { Navbar } from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { fetchPilots, haversineKm, FALLBACK_PILOTS, type Pilot } from "@/lib/pilots";
+import { APPS_SCRIPT_URL } from "@/lib/config";
 
 const BOOK_NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -30,13 +32,14 @@ const SERVICES = [
   { id: "agriculture",  icon: "🌾", label: "Agriculture",  price: 4000, description: "Land survey & spraying" },
 ];
 
-const PILOTS = [
-  { id: "p1", name: "Arjun Reddy",  initials: "AR", color: "#2563eb", rating: 4.8, reviews: 142, distance: "2.3 km", certs: ["DGCA RPC", "NPNT Enabled"], lat: 17.412, lng: 78.491 },
-  { id: "p2", name: "Priya Sharma", initials: "PS", color: "#7c3aed", rating: 4.9, reviews: 89,  distance: "3.7 km", certs: ["DGCA RPC", "NPNT Enabled", "Night Ops"], lat: 17.368, lng: 78.472 },
-  { id: "p3", name: "Kiran Naidu",  initials: "KN", color: "#0891b2", rating: 4.7, reviews: 204, distance: "5.1 km", certs: ["DGCA RPC"], lat: 17.395, lng: 78.512 },
-];
-
 type Step = 1 | 2 | 3;
+
+// Pilot enriched with distance from the pinned shoot location (null until pinned).
+type RankedPilot = Pilot & { distanceKm: number | null };
+
+function distanceLabel(km: number | null) {
+  return km == null ? "— km" : `${km.toFixed(1)} km`;
+}
 
 function inr(n: number) { return `₹${n.toLocaleString("en-IN")}`; }
 
@@ -99,8 +102,12 @@ export default function BookPage() {
   const mapInstanceRef = useRef<any>(null);
   const pinMarkerRef = useRef<any>(null);
   const mapLibreRef = useRef<any>(null);
+  const pilotMarkersRef = useRef<any[]>([]);
 
   const [step, setStep] = useState<Step>(1);
+  const [pilots, setPilots] = useState<Pilot[]>(FALLBACK_PILOTS);
+  const [mapReady, setMapReady] = useState(false);
+  const [selectedPilotId, setSelectedPilotId] = useState<string>("");
   const [selectedService, setSelectedService] = useState<typeof SERVICES[0] | null>(null);
   const [location, setLocation] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
@@ -110,9 +117,25 @@ export default function BookPage() {
   const [date, setDate] = useState("");
   const [minDate, setMinDate] = useState("");
   const [zone, setZone] = useState<ZoneCheckResult | null>(null);
-  const [matchedPilot, setMatchedPilot] = useState(PILOTS[0]);
   const [appearedPilots, setAppearedPilots] = useState<Set<string>>(new Set());
   const [booked, setBooked] = useState(false);
+
+  // Pilots ranked by distance from the pinned location (nearest first).
+  const rankedPilots = useMemo<RankedPilot[]>(() => {
+    if (!coords) return pilots.map((p) => ({ ...p, distanceKm: null }));
+    return pilots
+      .map((p) => ({ ...p, distanceKm: haversineKm(coords.lat, coords.lng, p.lat, p.lng) }))
+      .sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+  }, [pilots, coords]);
+
+  // Selected pilot, defaulting to the nearest available.
+  const matchedPilot =
+    rankedPilots.find((p) => p.id === selectedPilotId) ?? rankedPilots[0];
+
+  // Load the pilot database from the Google Sheet (falls back to seed list).
+  useEffect(() => {
+    fetchPilots().then(setPilots);
+  }, []);
 
   useEffect(() => {
     // Earliest bookable date is tomorrow (no same-day or past dates)
@@ -274,17 +297,8 @@ export default function BookPage() {
           paint: { "line-color": "#ef4444", "line-width": 2 },
         });
 
-        // Pilot markers
-        PILOTS.forEach((p) => {
-          const el = document.createElement("div");
-          el.style.cssText = `width:34px;height:34px;border-radius:50%;background:${p.color};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:11px;cursor:pointer;`;
-          el.textContent = p.initials;
-          new maplibregl.Marker({ element: el })
-            .setLngLat([p.lng, p.lat])
-            .setPopup(new maplibregl.Popup({ offset: 16, closeButton: false })
-              .setHTML(`<div style="font:13px sans-serif;padding:2px 0"><strong>${p.name}</strong><br/><span style="color:#f59e0b">★ ${p.rating}</span> · ${p.distance}</div>`))
-            .addTo(map);
-        });
+        // Pilot markers are plotted in a separate effect once the database loads.
+        setMapReady(true);
 
         // Map click → pin location
         map.on("click", (e: any) => {
@@ -301,22 +315,64 @@ export default function BookPage() {
     };
   }, [reverseGeocode, placePin]);
 
+  // Plot pilot markers whenever the database (or distance ordering) changes.
+  useEffect(() => {
+    const maplibregl = mapLibreRef.current;
+    const map = mapInstanceRef.current;
+    if (!mapReady || !maplibregl || !map) return;
+
+    pilotMarkersRef.current.forEach((m) => m.remove());
+    pilotMarkersRef.current = [];
+
+    rankedPilots.forEach((p) => {
+      const el = document.createElement("div");
+      el.style.cssText = `width:34px;height:34px;border-radius:50%;background:${p.color};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:11px;cursor:pointer;`;
+      el.textContent = p.initials;
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([p.lng, p.lat])
+        .setPopup(new maplibregl.Popup({ offset: 16, closeButton: false })
+          .setHTML(`<div style="font:13px sans-serif;padding:2px 0"><strong>${p.name}</strong><br/><span style="color:#f59e0b">★ ${p.rating}</span> · ${distanceLabel(p.distanceKm)}</div>`))
+        .addTo(map);
+      pilotMarkersRef.current.push(marker);
+    });
+  }, [mapReady, rankedPilots]);
+
   // Searching animation
   useEffect(() => {
     if (step !== 2) return;
-    PILOTS.forEach((p, i) => {
+    rankedPilots.forEach((p, i) => {
       const t = setTimeout(() => setAppearedPilots((prev) => new Set([...prev, p.id])), 500 + i * 400);
       return () => clearTimeout(t);
     });
-    const adv = setTimeout(() => { setMatchedPilot(PILOTS[0]); setStep(3); }, 2200);
+    const adv = setTimeout(() => { setStep(3); }, 2200);
     return () => clearTimeout(adv);
-  }, [step]);
+  }, [step, rankedPilots]);
 
   function handleFindPilots() {
     if (!selectedService || !coords) return;
     setAppearedPilots(new Set());
     setBooked(false);
     setStep(2);
+  }
+
+  function confirmBooking() {
+    // Record the booking in the Google Sheet (fire-and-forget; safe to fail).
+    if (APPS_SCRIPT_URL) {
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          formType: "booking",
+          service: selectedService?.label ?? "",
+          location,
+          date,
+          pilot: matchedPilot?.name ?? "",
+          zone: zone?.zoneLabel ?? "Green",
+        }),
+      }).catch(() => {});
+    }
+    setBooked(true);
   }
 
   const zoneLabel = zone
@@ -331,7 +387,7 @@ export default function BookPage() {
     (zone && zone.zoneType !== "green"
       ? `⚠️ Zone: ${zone.zoneLabel} — ${zone.facilityName}. Please arrange required clearance.\n`
       : `✅ Zone: Green — no restrictions.\n`) +
-    `Pilot: ${matchedPilot.name}`
+    `Pilot: ${matchedPilot?.name ?? "to be assigned"}`
   );
 
   return (
@@ -455,12 +511,12 @@ export default function BookPage() {
                 <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {inr(selectedService?.price || 0)}</p>
               </div>
               <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase">Available Pilots</p>
-              {PILOTS.map((p) => (
+              {rankedPilots.map((p) => (
                 <div key={p.id} className={`flex items-center gap-3 bg-secondary border border-border p-3 transition-all duration-500 ${appearedPilots.has(p.id) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
                   <div className="w-10 h-10 flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: p.color }}>{p.initials}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-sm">{p.name}</p>
-                    <p className="font-mono text-[10px] text-muted-foreground tracking-wide">⭐ {p.rating} · {p.distance}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground tracking-wide">⭐ {p.rating} · {distanceLabel(p.distanceKm)}</p>
                   </div>
                   <span className="font-mono text-[10px] text-primary tracking-wide">Checking…</span>
                 </div>
@@ -482,14 +538,14 @@ export default function BookPage() {
               {/* Pilot card */}
               <div className="border border-primary p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-14 h-14 flex items-center justify-center text-white font-bold text-xl flex-shrink-0" style={{ background: matchedPilot.color }}>{matchedPilot.initials}</div>
+                  <div className="w-14 h-14 flex items-center justify-center text-white font-bold text-xl flex-shrink-0" style={{ background: matchedPilot?.color }}>{matchedPilot?.initials}</div>
                   <div>
-                    <p className="font-bold text-base">{matchedPilot.name}</p>
-                    <p className="font-mono text-[10px] text-muted-foreground tracking-wide flex items-center gap-1"><Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" /> {matchedPilot.rating} · {matchedPilot.distance}</p>
+                    <p className="font-bold text-base">{matchedPilot?.name}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground tracking-wide flex items-center gap-1"><Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" /> {matchedPilot?.rating} · {distanceLabel(matchedPilot?.distanceKm ?? null)}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                  {matchedPilot.certs.map((c) => (
+                  {matchedPilot?.certs.map((c) => (
                     <span key={c} className="flex items-center gap-1 font-mono text-[10px] tracking-wide bg-primary/10 text-primary px-2 py-1"><Shield className="w-3 h-3" />{c}</span>
                   ))}
                   {(zone?.zoneType === "red" || zone?.zoneType?.includes("yellow")) && (
@@ -510,15 +566,15 @@ export default function BookPage() {
               {/* Other pilots */}
               <div>
                 <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase mb-2">Switch Pilot</p>
-                {PILOTS.map((p) => (
-                  <div key={p.id} onClick={() => setMatchedPilot(p)}
-                    className={`flex items-center gap-3 p-2.5 mb-1.5 cursor-pointer border transition-all ${matchedPilot.id === p.id ? "border-primary bg-primary/5" : "border-transparent hover:bg-secondary"}`}>
+                {rankedPilots.map((p) => (
+                  <div key={p.id} onClick={() => setSelectedPilotId(p.id)}
+                    className={`flex items-center gap-3 p-2.5 mb-1.5 cursor-pointer border transition-all ${matchedPilot?.id === p.id ? "border-primary bg-primary/5" : "border-transparent hover:bg-secondary"}`}>
                     <div className="w-9 h-9 flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: p.color }}>{p.initials}</div>
                     <div className="flex-1">
                       <p className="font-semibold text-sm">{p.name}</p>
-                      <p className="font-mono text-[10px] text-muted-foreground tracking-wide">⭐ {p.rating} · {p.distance}</p>
+                      <p className="font-mono text-[10px] text-muted-foreground tracking-wide">⭐ {p.rating} · {distanceLabel(p.distanceKm)}</p>
                     </div>
-                    {matchedPilot.id === p.id && <CheckCircle className="w-4 h-4 text-primary" />}
+                    {matchedPilot?.id === p.id && <CheckCircle className="w-4 h-4 text-primary" />}
                   </div>
                 ))}
               </div>
@@ -526,7 +582,7 @@ export default function BookPage() {
               <div className="flex flex-col gap-2 mt-auto">
                 {!booked ? (
                   <>
-                    <button onClick={() => setBooked(true)} className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+                    <button onClick={confirmBooking} className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
                       Accept & Book <ChevronRight className="w-4 h-4" />
                     </button>
                     <button onClick={() => { setAppearedPilots(new Set()); setStep(2); }} className="w-full py-2.5 border border-border font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground flex items-center justify-center gap-2 hover:border-foreground transition-colors">
@@ -538,14 +594,14 @@ export default function BookPage() {
                     <p className="font-semibold text-green-800 mb-1">Booking Confirmed!</p>
                     <p className="text-xs text-green-700 mb-3">
                       {zone && zone.zoneType !== "green"
-                        ? `Zone notice included — ${matchedPilot.name} will arrange clearance for ${zone.zoneLabel}.`
-                        : `Connect with ${matchedPilot.name} to finalise shoot details.`}
+                        ? `Zone notice included — ${matchedPilot?.name} will arrange clearance for ${zone.zoneLabel}.`
+                        : `Connect with ${matchedPilot?.name} to finalise shoot details.`}
                     </p>
                     <a href={`https://wa.me/919645179861?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
                       <Phone className="w-4 h-4" /> Open WhatsApp
                     </a>
-                    <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
+                    <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
                       className="block w-full mt-2 text-xs text-gray-500 hover:text-gray-700 underline">
                       Start a new booking
                     </button>

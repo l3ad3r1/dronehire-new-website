@@ -21,9 +21,19 @@ All audit bugs from Dronehire.md fixed across two rounds (commits `17525d4` and 
 - `next.config.ts`: minimal SSR config, no static export
 - All changes pushed; Vercel build triggered on commit `0fcb2c4`
 
-## Currently in progress
-Nothing — all known audit items resolved.
+## Google Sheets pilot database (done in code)
+- `apps-script/Code.gs`: doGet(?type=pilots) returns active pilots; doPost routes
+  quote/booking/pilot writes; pilot signups auto-append to Pilots tab; setup() seeds 3 pilots.
+- `src/lib/pilots.ts`: fetchPilots() (GET sheet) + FALLBACK_PILOTS seed + haversineKm.
+- `src/app/book/page.tsx`: pilots now fetched from sheet (fallback to seed), markers plotted
+  dynamically, ranked by real distance from pinned location; Accept & Book POSTs to Bookings tab.
+- `SETUP-SHEETS.md`: deploy steps + sheet schema.
+
+## ACTION REQUIRED (manual, needs user's Google account)
+Redeploy the Apps Script so doGet works live:
+1. Paste apps-script/Code.gs into the bound Apps Script project.
+2. Run setup() once. 3. Deploy > Manage deployments > New version.
+Until then the booking page falls back to the seed pilot list (works, but static).
 
 ## Next steps
-- Verify the live Vercel deployment looks correct
-- Address any new feedback or audit items
+- After redeploy, verify GET ?type=pilots returns JSON and a pilot signup lands in the sheet.
