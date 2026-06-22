@@ -129,7 +129,7 @@ export const PRICING_TIERS: PricingTier[] = [
     ],
   },
   {
-    name: "Wedding / event",
+    name: "Weddings & events",
     price: "₹18,000+",
     description:
       "Per event. The most popular choice for wedding planners and families across Hyderabad.",
@@ -171,7 +171,7 @@ export const PRICING_TIERS: PricingTier[] = [
 
 export const GUARANTEES: Guarantee[] = [
   {
-    title: "DGCA licensed",
+    title: "DGCA-licensed",
     description:
       "Valid Remote Pilot Certificate. Fully legal, compliant with Hyderabad airspace rules.",
   },
@@ -196,7 +196,7 @@ export const FAQS: FaqItem[] = [
   {
     question: "Is drone photography legal in Hyderabad?",
     answer:
-      "Yes — when done by a DGCA-certified Remote Pilot using a registered drone. Every DroneHire pilot holds a valid Remote Pilot Certificate and files the necessary permissions. We do not fly in restricted zones (near airports, defence areas, or the secretariat) without prior clearance.",
+      "Yes — when done by a DGCA-licensed Remote Pilot using a registered drone. Every DroneHire pilot holds a valid Remote Pilot Certificate and files the necessary permissions. We do not fly in restricted zones (near airports, defence areas, or the secretariat) without prior clearance.",
   },
   {
     question: "How quickly can I get a pilot?",
@@ -260,4 +260,4 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 
 export const FOOTER_LEGAL = "© 2026 DroneHire · Hyderabad, Telangana";
 export const FOOTER_DISCLAIMER =
-  "All pilots are DGCA-certified. Prices subject to confirmation.";
+  "All pilots are DGCA-licensed. Prices subject to confirmation.";

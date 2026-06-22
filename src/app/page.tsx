@@ -74,7 +74,7 @@ export default function HomePage() {
     <div className="min-h-screen overflow-x-hidden">
       <Navbar
         links={HOME_NAV_LINKS}
-        ctaLabel="Book a Drone Now →"
+        ctaLabel="Book a pilot →"
         ctaHref="/book"
         ctaExternal={false}
       />

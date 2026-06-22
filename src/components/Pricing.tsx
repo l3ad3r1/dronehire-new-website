@@ -10,7 +10,14 @@ export function Pricing() {
         </div>
         <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-10">SIMPLE, NO-SURPRISE RATES</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 items-start">
-          {PRICING_TIERS.map((tier) => (
+          {PRICING_TIERS.map((tier) => {
+            // Enterprise/custom tiers need scoping, not a retail quick-book.
+            const isQuote = tier.price.toLowerCase() === "custom";
+            const ctaHref = isQuote
+              ? `${WHATSAPP_URL}?text=${encodeURIComponent(`Hi, I'd like an enterprise quote for ${tier.name} drone services in Hyderabad. Please share scope and pricing.`)}`
+              : "/book";
+            const ctaLabel = isQuote ? "Request a quote →" : "Book a pilot →";
+            return (
             <div
               key={tier.name}
               className={`relative border p-8 flex flex-col h-full transition-colors ${
@@ -44,17 +51,19 @@ export function Pricing() {
                 ))}
               </ul>
               <a
-                href="/book"
+                href={ctaHref}
+                {...(isQuote ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className={`w-full h-11 flex items-center justify-center font-mono text-xs tracking-[0.15em] uppercase transition-colors ${
                   tier.popular
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "border border-border text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
-                Book a Drone Now →
+                {ctaLabel}
               </a>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

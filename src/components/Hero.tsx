@@ -151,6 +151,25 @@ export function Hero() {
             >
               DGCA-licensed pilots for real estate shoots in Gachibowli, wedding films in Banjara Hills, and construction surveys across Hyderabad — booked in minutes.
             </p>
+            <div className="animate-fade-up" style={{ animationDelay: "0.24s" }}>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="/book"
+                  className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase hover:bg-primary/90 transition-colors"
+                >
+                  Check pilot availability →
+                </a>
+                <a
+                  href="/map"
+                  className="inline-flex items-center justify-center gap-2 h-12 px-6 border border-border font-mono text-xs tracking-[0.15em] uppercase text-foreground hover:border-primary hover:text-primary transition-colors"
+                >
+                  Explore airspace map 🗺️
+                </a>
+              </div>
+              <p className="mt-3 font-mono text-[11px] text-muted-foreground tracking-wide">
+                Takes 2 mins · Pay 50% only after you approve the preview
+              </p>
+            </div>
           </div>
 
           {/* RIGHT column — Get a quote card */}
