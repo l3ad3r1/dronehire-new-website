@@ -465,15 +465,6 @@ export default function BookPage() {
               {/* Zone status */}
               {coords && <ZoneBanner zone={zone} />}
 
-              {/* Map legend */}
-              {!coords && (
-                <div className="flex gap-3 font-mono text-[10px] tracking-wide text-muted-foreground bg-secondary p-3">
-                  <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />Red = Prohibited</div>
-                  <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block" />Yellow = Permission</div>
-                  <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />Green = Free</div>
-                </div>
-              )}
-
               {/* Service */}
               <div>
                 <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase mb-1.5">Service</p>
