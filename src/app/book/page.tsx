@@ -367,6 +367,7 @@ export default function BookPage() {
           service: selectedService?.label ?? "",
           location,
           date,
+          pilotId: matchedPilot?.id ?? "",
           pilot: matchedPilot?.name ?? "",
           zone: zone?.zoneLabel ?? "Green",
         }),

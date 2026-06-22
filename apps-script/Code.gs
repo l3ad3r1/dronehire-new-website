@@ -19,7 +19,7 @@
  *   After changing this script, Deploy > Manage deployments > Edit > New version.
  */
 
-var PILOT_HEADERS   = ["id","name","phone","initials","color","rating","reviews","lat","lng","certs","status","createdAt"];
+var PILOT_HEADERS   = ["id","name","phone","initials","color","rating","reviews","lat","lng","certs","status","createdAt","busyUntil"];
 var QUOTE_HEADERS   = ["createdAt","shootType","location","date"];
 var BOOKING_HEADERS = ["createdAt","customerName","phone","service","location","date","pilot","zone"];
 
@@ -51,6 +51,8 @@ function doPost(e) {
           now, body.customerName || "", body.phone || "", body.service || "",
           body.location || "", body.date || "", body.pilot || "", body.zone || "",
         ]);
+        // Mark the assigned pilot unavailable until the shoot date passes.
+        assignPilot(body.pilotId, body.pilot, body.date);
         break;
       case "quote":
       default:
@@ -67,13 +69,18 @@ function doPost(e) {
 // ── Pilots ─────────────────────────────────────────────────────────────────--
 
 function getActivePilots() {
-  var sh = sheet("Pilots", PILOT_HEADERS);
+  var sh = pilotSheet();
   var rows = sh.getDataRange().getValues();
   var head = rows.shift();
   var idx = {};
   head.forEach(function (h, i) { idx[h] = i; });
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
   return rows
-    .filter(function (r) { return String(r[idx.status]).toLowerCase() === "active"; })
+    .filter(function (r) {
+      if (String(r[idx.status]).toLowerCase() !== "active") return false;   // must be approved
+      var busyUntil = toDateStr(r[idx.busyUntil]);
+      return !busyUntil || busyUntil < today;                              // free once the job date passes
+    })
     .map(function (r) {
       return {
         id: String(r[idx.id]),
@@ -90,7 +97,7 @@ function getActivePilots() {
 }
 
 function appendPilot(body, now) {
-  var sh = sheet("Pilots", PILOT_HEADERS);
+  var sh = pilotSheet();
   var name = body.name || "New Pilot";
   var certs = ["DGCA RPC", "NPNT Enabled"];
   if (body.shootTypes) certs.push(body.shootTypes);
@@ -108,9 +115,32 @@ function appendPilot(body, now) {
     lat,
     lng,
     certs.join(", "),
-    "active",          // set to "pending" instead if you want to vet signups first
+    "pending",         // signups start pending — flip to "active" in the sheet to approve
     now,
+    "",                // busyUntil (set when a job is assigned)
   ]);
+}
+
+/** Mark a pilot unavailable until the given shoot date (keeps the later date if already booked). */
+function assignPilot(pilotId, pilotName, date) {
+  if (!date) return;
+  var sh = pilotSheet();
+  var data = sh.getDataRange().getValues();
+  var head = data[0];
+  var idIdx = head.indexOf("id");
+  var nameIdx = head.indexOf("name");
+  var buIdx = head.indexOf("busyUntil");
+  var newDate = String(date).slice(0, 10);
+  for (var i = 1; i < data.length; i++) {
+    var match = (pilotId && String(data[i][idIdx]) === String(pilotId)) ||
+                (!pilotId && pilotName && String(data[i][nameIdx]) === String(pilotName));
+    if (match) {
+      var existing = toDateStr(data[i][buIdx]);
+      var until = (existing && existing > newDate) ? existing : newDate;
+      sh.getRange(i + 1, buIdx + 1).setValue(until);
+      return;
+    }
+  }
 }
 
 function initials(name) {
@@ -130,6 +160,26 @@ function sheet(tabName, headers) {
   return sh;
 }
 
+/** Pilots sheet, guaranteeing the busyUntil column exists (migrates older sheets). */
+function pilotSheet() {
+  var sh = sheet("Pilots", PILOT_HEADERS);
+  var lastCol = sh.getLastColumn();
+  var header = sh.getRange(1, 1, 1, lastCol).getValues()[0];
+  if (header.indexOf("busyUntil") === -1) {
+    sh.getRange(1, lastCol + 1).setValue("busyUntil");
+  }
+  return sh;
+}
+
+/** Normalise a cell (Date object or text) to a "yyyy-MM-dd" string. */
+function toDateStr(v) {
+  if (!v) return "";
+  if (Object.prototype.toString.call(v) === "[object Date]") {
+    return Utilities.formatDate(v, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  }
+  return String(v).slice(0, 10);
+}
+
 function json(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
@@ -141,13 +191,13 @@ function json(obj) {
 function setup() {
   sheet("Quotes", QUOTE_HEADERS);
   sheet("Bookings", BOOKING_HEADERS);
-  var sh = sheet("Pilots", PILOT_HEADERS);
+  var sh = pilotSheet();
   if (sh.getLastRow() <= 1) {
     var now = new Date();
     var seed = [
-      ["p1","Arjun Reddy","","AR","#2563eb",4.8,142,17.412,78.491,"DGCA RPC, NPNT Enabled","active",now],
-      ["p2","Priya Sharma","","PS","#7c3aed",4.9,89, 17.368,78.472,"DGCA RPC, NPNT Enabled, Night Ops","active",now],
-      ["p3","Kiran Naidu", "","KN","#0891b2",4.7,204,17.395,78.512,"DGCA RPC","active",now],
+      ["p1","Arjun Reddy","","AR","#2563eb",4.8,142,17.412,78.491,"DGCA RPC, NPNT Enabled","active",now,""],
+      ["p2","Priya Sharma","","PS","#7c3aed",4.9,89, 17.368,78.472,"DGCA RPC, NPNT Enabled, Night Ops","active",now,""],
+      ["p3","Kiran Naidu", "","KN","#0891b2",4.7,204,17.395,78.512,"DGCA RPC","active",now,""],
     ];
     seed.forEach(function (r) { sh.appendRow(r); });
   }
