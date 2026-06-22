@@ -82,12 +82,12 @@ export default function HomePage() {
       <main>
         <Hero />
         <StatBar />
-        <PlatformSection />
         <Process />
         <Services />
         <WhyUs />
         <Pricing />
         <Faq items={FAQS} />
+        <PlatformSection />
       </main>
       <Footer />
       <WhatsAppButton />
