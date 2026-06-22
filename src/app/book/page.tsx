@@ -108,13 +108,21 @@ export default function BookPage() {
   const [locationError, setLocationError] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [date, setDate] = useState("");
-  const [today, setToday] = useState("");
+  const [minDate, setMinDate] = useState("");
   const [zone, setZone] = useState<ZoneCheckResult | null>(null);
   const [matchedPilot, setMatchedPilot] = useState(PILOTS[0]);
   const [appearedPilots, setAppearedPilots] = useState<Set<string>>(new Set());
   const [booked, setBooked] = useState(false);
 
-  useEffect(() => { setToday(new Date().toISOString().split("T")[0]); }, []);
+  useEffect(() => {
+    // Earliest bookable date is tomorrow (no same-day or past dates)
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    const y = t.getFullYear();
+    const m = String(t.getMonth() + 1).padStart(2, "0");
+    const d = String(t.getDate()).padStart(2, "0");
+    setMinDate(`${y}-${m}-${d}`);
+  }, []);
 
   // Place a pin on the map at given coords
   const placePin = useCallback((lat: number, lng: number) => {
@@ -424,7 +432,8 @@ export default function BookPage() {
                 <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase mb-1.5">Shoot Date</p>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input type="date" min={today} value={date} onChange={(e) => setDate(e.target.value)}
+                  <input type="date" min={minDate} value={date}
+                    onChange={(e) => { if (!e.target.value || e.target.value >= minDate) setDate(e.target.value); }}
                     className="w-full pl-9 pr-3 py-2.5 border border-border bg-card text-sm focus:outline-none focus:border-primary transition-colors" />
                 </div>
               </div>

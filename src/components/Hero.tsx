@@ -54,13 +54,32 @@ function ShootTypeSelect({ value, onChange }: ShootTypeSelectProps) {
 export function Hero() {
   const [shootType, setShootType] = useState(SHOOT_TYPES[0]);
   const [submitted, setSubmitted] = useState(false);
+  const [minDate, setMinDate] = useState("");
+  const [dateError, setDateError] = useState("");
   const locationRef = useRef<HTMLInputElement>(null);
   const dateRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Earliest selectable shoot date is tomorrow (no same-day or past dates)
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    const y = t.getFullYear();
+    const m = String(t.getMonth() + 1).padStart(2, "0");
+    const d = String(t.getDate()).padStart(2, "0");
+    setMinDate(`${y}-${m}-${d}`);
+  }, []);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const location = locationRef.current?.value ?? "";
     const date = dateRef.current?.value ?? "";
+
+    // Reject any date earlier than tomorrow even if typed/pasted manually
+    if (date && date < minDate) {
+      setDateError("Please pick a date from tomorrow onwards.");
+      return;
+    }
+    setDateError("");
 
     if (APPS_SCRIPT_URL) {
       fetch(APPS_SCRIPT_URL, {
@@ -185,7 +204,8 @@ export function Hero() {
                   </div>
                   <div>
                     <label className="block font-mono text-[11px] tracking-[0.2em] uppercase text-foreground/60 mb-2">Shoot date</label>
-                    <input ref={dateRef} type="date" className="w-full h-11 px-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors" />
+                    <input ref={dateRef} type="date" min={minDate} onChange={() => dateError && setDateError("")} className="w-full h-11 px-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors" />
+                    {dateError && <p className="mt-2 font-mono text-[11px] text-red-500">{dateError}</p>}
                   </div>
                   <button
                     type="submit"
