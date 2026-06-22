@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, type FormEvent } from "react";
-import { HERO_TAGS, SHOOT_TYPES, COORDINATES } from "@/lib/content";
+import { SHOOT_TYPES, COORDINATES } from "@/lib/content";
 import { APPS_SCRIPT_URL } from "@/lib/config";
 import { SelectChevronIcon } from "@/components/icons";
 
@@ -151,21 +151,6 @@ export function Hero() {
             >
               DGCA-licensed pilots for real estate shoots in Gachibowli, wedding films in Banjara Hills, and construction surveys across Hyderabad — booked in minutes.
             </p>
-            <div className="flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "0.24s" }}>
-              {HERO_TAGS.map((tag) => (
-                <button
-                  key={tag.label}
-                  type="button"
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent("dh:filter", { detail: tag.label }));
-                    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="px-4 py-2 bg-foreground/5 border border-border/50 font-mono text-xs tracking-wider text-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer select-none"
-                >
-                  {tag.emoji} {tag.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* RIGHT column — Get a quote card */}
