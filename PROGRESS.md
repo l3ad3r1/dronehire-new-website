@@ -40,5 +40,24 @@ All audit bugs from Dronehire.md fixed across two rounds (commits `17525d4` and 
 - Commit from this config onward deploys normally; the 5 blocked deployments are
   superseded once a valid commit lands.
 
+## Booking + Quote forms (DONE)
+- Booking: customer name + WhatsApp number captured (required, validated), written to Bookings tab.
+- Quote (homepage Hero): name + WhatsApp number captured (required, validated), written to Quotes tab.
+- Both forms restrict shoot dates to tomorrow onward.
+- Booking ranks pilots by real distance; "Accept & Book" stamps pilot busyUntil.
+- Removed duplicate airspace legend from booking panel (kept the map one).
+
+## Quotes CRM pipeline (DONE)
+- Quotes tab columns: createdAt, shootType, location, date, name, phone, stage, assignedTo.
+- New quotes default stage = "Warm enquiry"; stage is a dropdown
+  (Warm enquiry / Rate negotiation / Job accepted / Job rejected). assignedTo is free text.
+
+## Apps Script notes
+- Current /exec URL is in src/lib/config.ts. To update the script, ALWAYS use
+  Deploy > Manage deployments > Edit (pencil) > New version — this keeps the URL stable.
+  Using "New deployment" mints a new URL and forces a config.ts change.
+- Pilot signups land as status "pending" (approve by setting "active" in the sheet).
+- Geocoding uses areas + ", India" (Maps service authorized).
+
 ## Next steps
-- Run setup() so the sheet returns the 3 seed pilots; confirm a pilot signup appends a row.
+- None outstanding. Optional: stricter Indian phone validation (leading 6-9, +91 prefix).
