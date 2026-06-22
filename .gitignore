@@ -4,4 +4,4 @@ node_modules/
 *.db
 dev.log
 .claude/
-*.log
+*.logtsconfig.tsbuildinfo
