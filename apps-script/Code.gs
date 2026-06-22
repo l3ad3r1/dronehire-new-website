@@ -136,7 +136,7 @@ function appendPilot(body, now) {
 function geocodeArea(areas) {
   if (!areas) return null;
   try {
-    var res = Maps.newGeocoder().setRegion("in").geocode(areas + ", Hyderabad, India");
+    var res = Maps.newGeocoder().setRegion("in").geocode(areas + ", India");
     if (res && res.results && res.results.length) {
       var loc = res.results[0].geometry.location;
       if (loc) return { lat: loc.lat, lng: loc.lng };
