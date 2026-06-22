@@ -19,7 +19,9 @@
  *   After changing this script, Deploy > Manage deployments > Edit > New version.
  */
 
-var PILOT_HEADERS   = ["id","name","phone","initials","color","rating","reviews","lat","lng","certs","status","createdAt","busyUntil"];
+// First block (id..busyUntil) is what the booking page uses; the rest is the raw
+// application data captured from the signup form, kept for vetting.
+var PILOT_HEADERS   = ["id","name","phone","initials","color","rating","reviews","lat","lng","certs","status","createdAt","busyUntil","areas","dgca","experience","drone","shootTypes","notes"];
 var QUOTE_HEADERS   = ["createdAt","shootType","location","date"];
 var BOOKING_HEADERS = ["createdAt","customerName","phone","service","location","date","pilot","zone"];
 
@@ -101,9 +103,11 @@ function appendPilot(body, now) {
   var name = body.name || "New Pilot";
   var certs = ["DGCA RPC", "NPNT Enabled"];
   if (body.shootTypes) certs.push(body.shootTypes);
-  // Scatter new pilots within ~5km of the city centre so they appear on the map.
-  var lat = HYD_LAT + (Math.random() - 0.5) * 0.08;
-  var lng = HYD_LNG + (Math.random() - 0.5) * 0.08;
+  // Derive real coordinates from the pilot's stated service area; fall back to a
+  // random point near the city centre only if geocoding fails.
+  var geo = geocodeArea(body.areas);
+  var lat = geo ? geo.lat : HYD_LAT + (Math.random() - 0.5) * 0.08;
+  var lng = geo ? geo.lng : HYD_LNG + (Math.random() - 0.5) * 0.08;
   sh.appendRow([
     "p" + now.getTime(),
     name,
@@ -118,7 +122,27 @@ function appendPilot(body, now) {
     "pending",         // signups start pending — flip to "active" in the sheet to approve
     now,
     "",                // busyUntil (set when a job is assigned)
+    // raw application data (for vetting; not shown to customers)
+    body.areas || "",
+    body.dgca || "",
+    body.experience || "",
+    body.drone || "",
+    body.shootTypes || "",
+    body.notes || "",
   ]);
+}
+
+/** Geocode a free-text Hyderabad area to {lat,lng}, or null if it can't be resolved. */
+function geocodeArea(areas) {
+  if (!areas) return null;
+  try {
+    var res = Maps.newGeocoder().setRegion("in").geocode(areas + ", Hyderabad, India");
+    if (res && res.results && res.results.length) {
+      var loc = res.results[0].geometry.location;
+      if (loc) return { lat: loc.lat, lng: loc.lng };
+    }
+  } catch (e) { /* quota or lookup failure → fall back to random */ }
+  return null;
 }
 
 /** Mark a pilot unavailable until the given shoot date (keeps the later date if already booked). */
@@ -160,14 +184,18 @@ function sheet(tabName, headers) {
   return sh;
 }
 
-/** Pilots sheet, guaranteeing the busyUntil column exists (migrates older sheets). */
+/** Pilots sheet, appending any missing PILOT_HEADERS columns (migrates older sheets). */
 function pilotSheet() {
   var sh = sheet("Pilots", PILOT_HEADERS);
   var lastCol = sh.getLastColumn();
   var header = sh.getRange(1, 1, 1, lastCol).getValues()[0];
-  if (header.indexOf("busyUntil") === -1) {
-    sh.getRange(1, lastCol + 1).setValue("busyUntil");
-  }
+  PILOT_HEADERS.forEach(function (h) {
+    if (header.indexOf(h) === -1) {
+      lastCol += 1;
+      sh.getRange(1, lastCol).setValue(h);
+      header.push(h);
+    }
+  });
   return sh;
 }
 
@@ -195,9 +223,9 @@ function setup() {
   if (sh.getLastRow() <= 1) {
     var now = new Date();
     var seed = [
-      ["p1","Arjun Reddy","","AR","#2563eb",4.8,142,17.412,78.491,"DGCA RPC, NPNT Enabled","active",now,""],
-      ["p2","Priya Sharma","","PS","#7c3aed",4.9,89, 17.368,78.472,"DGCA RPC, NPNT Enabled, Night Ops","active",now,""],
-      ["p3","Kiran Naidu", "","KN","#0891b2",4.7,204,17.395,78.512,"DGCA RPC","active",now,""],
+      ["p1","Arjun Reddy","","AR","#2563eb",4.8,142,17.412,78.491,"DGCA RPC, NPNT Enabled","active",now,"","","","","","",""],
+      ["p2","Priya Sharma","","PS","#7c3aed",4.9,89, 17.368,78.472,"DGCA RPC, NPNT Enabled, Night Ops","active",now,"","","","","","",""],
+      ["p3","Kiran Naidu", "","KN","#0891b2",4.7,204,17.395,78.512,"DGCA RPC","active",now,"","","","","","",""],
     ];
     seed.forEach(function (r) { sh.appendRow(r); });
   }
