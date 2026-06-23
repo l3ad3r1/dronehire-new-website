@@ -84,17 +84,6 @@ export const SERVICES: Service[] = [
   },
   {
     index: "SERVICE_03",
-    title: "Construction & infra",
-    description:
-      "Weekly progress documentation, orthomosaic mapping, and stakeholder-ready reports for sites across the Outer Ring Road and HMDA zones.",
-    image: "/images/service-construction.png",
-    imageAlt: "Construction & infra aerial photography",
-    ctaLabel: "Book a construction survey →",
-    whatsappMessage:
-      "Hi, I'd like to book drone surveys for a construction / infra project in Hyderabad. Please share your recurring survey plans and pricing.",
-  },
-  {
-    index: "SERVICE_04",
     title: "Corporate & events",
     description:
       "Product launches, campus flyovers, open-air concerts — if it happens in Hyderabad and needs a bird's-eye view, we've got a licensed pilot for it.",
@@ -103,6 +92,17 @@ export const SERVICES: Service[] = [
     ctaLabel: "Book a corporate shoot →",
     whatsappMessage:
       "Hi, I'd like to book aerial coverage for a corporate event in Hyderabad. Please share available dates and pricing.",
+  },
+  {
+    index: "SERVICE_04",
+    title: "Construction & infra",
+    description:
+      "Weekly progress documentation, orthomosaic mapping, and stakeholder-ready reports for sites across the Outer Ring Road and HMDA zones.",
+    image: "/images/service-construction.png",
+    imageAlt: "Construction & infra aerial photography",
+    ctaLabel: "Book a construction survey →",
+    whatsappMessage:
+      "Hi, I'd like to book drone surveys for a construction / infra project in Hyderabad. Please share your recurring survey plans and pricing.",
   },
 ];
 
