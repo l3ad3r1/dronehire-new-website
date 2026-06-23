@@ -142,19 +142,6 @@ export const PRICING_TIERS: PricingTier[] = [
     popular: true,
   },
   {
-    name: "Construction",
-    price: "Custom",
-    description:
-      "Monthly plans for sites across HMDA zones and the Outer Ring Road corridor.",
-    features: [
-      "Recurring shoot plans",
-      "Orthomosaic mapping",
-      "Stakeholder-ready reports",
-      "Bulk shoot discounts",
-      "Dedicated pilot assignment",
-    ],
-  },
-  {
     name: "Corporate & events",
     price: "₹25,000+",
     description:
@@ -165,6 +152,19 @@ export const PRICING_TIERS: PricingTier[] = [
       "Multiple locations & angles",
       "Priority scheduling",
       "Custom post-processing",
+    ],
+  },
+  {
+    name: "Construction",
+    price: "Custom",
+    description:
+      "Monthly plans for sites across HMDA zones and the Outer Ring Road corridor.",
+    features: [
+      "Recurring shoot plans",
+      "Orthomosaic mapping",
+      "Stakeholder-ready reports",
+      "Bulk shoot discounts",
+      "Dedicated pilot assignment",
     ],
   },
 ];
