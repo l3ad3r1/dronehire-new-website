@@ -47,7 +47,7 @@ function calculateDistanceAndBearing(
   const x =
     Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
     Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLng);
-  let bearing = (toDeg(Math.atan2(y, x)) + 360) % 360;
+  const bearing = (toDeg(Math.atan2(y, x)) + 360) % 360;
 
   return { distanceKm, distanceNm, bearing };
 }
