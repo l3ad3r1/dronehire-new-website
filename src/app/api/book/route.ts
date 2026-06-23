@@ -5,17 +5,17 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Server-side price map (INR). Do NOT trust client-sent amounts.
+// Construction is a quote service — not instantly payable, so omitted here.
 const SERVICE_PRICES: Record<string, number> = {
-  realestate: 3500,
-  wedding: 5000,
-  construction: 3000,
-  agriculture: 4000,
+  realestate: 12000,
+  wedding: 18000,
+  corporate: 25000,
 };
 
 const BookingSchema = z.object({
   customerName: z.string().min(1, "Name is required"),
   phone: z.string().min(1, "Phone is required"),
-  service: z.enum(["realestate", "wedding", "construction", "agriculture"], {
+  service: z.enum(["realestate", "wedding", "corporate", "construction"], {
     errorMap: () => ({ message: "Invalid service type" }),
   }),
   location: z.string().min(1, "Location is required"),
@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
   }
 
   const { customerName, phone, service, location, date, email } = parsed.data;
-  const amount = SERVICE_PRICES[service];
+  // construction is a quote service — no instant price
+  const amount = SERVICE_PRICES[service] ?? null;
 
   try {
     const booking = await prisma.booking.create({
