@@ -26,10 +26,10 @@ const ALL_ZONES = new Set([
 ] as any);
 
 const SERVICES = [
-  { id: "realestate", icon: "🏠", label: "Real Estate", price: 3500, description: "Property & land aerial photos" },
-  { id: "wedding",    icon: "💍", label: "Wedding",     price: 5000, description: "Event & ceremony coverage" },
-  { id: "construction", icon: "🏗️", label: "Construction", price: 3000, description: "Progress documentation" },
-  { id: "agriculture",  icon: "🌾", label: "Agriculture",  price: 4000, description: "Land survey & spraying" },
+  { id: "realestate",  icon: "🏠", label: "Real Estate",       price: 12000 as number | null, description: "Property & land aerial photos" },
+  { id: "wedding",     icon: "💍", label: "Wedding",           price: 18000 as number | null, description: "Event & ceremony coverage" },
+  { id: "corporate",   icon: "🎉", label: "Corporate & Events", price: 25000 as number | null, description: "Product launches & flyovers" },
+  { id: "construction", icon: "🏗️", label: "Construction",    price: null  as number | null, description: "Progress documentation" },
 ];
 
 type Step = 1 | 2 | 3;
@@ -41,7 +41,7 @@ function distanceLabel(km: number | null) {
   return km == null ? "— km" : `${km.toFixed(1)} km`;
 }
 
-function inr(n: number) { return `₹${n.toLocaleString("en-IN")}`; }
+function inr(n: number | null) { return n == null ? "Custom" : `₹${n.toLocaleString("en-IN")}`; }
 
 function ZoneBanner({ zone }: { zone: ZoneCheckResult | null }) {
   if (!zone || zone.zoneType === "green") return (
@@ -390,7 +390,7 @@ export default function BookPage() {
     (customerPhone ? `📞 WhatsApp: ${customerPhone}\n` : "") +
     `📍 Location: ${location || "Hyderabad"}\n` +
     `📅 Date: ${date || "TBD"}\n` +
-    `💰 Budget: ${selectedService ? inr(selectedService.price) : ""}+\n` +
+    `💰 Budget: ${selectedService ? (inr(selectedService.price) + (selectedService.price != null ? "+" : "")) : ""}\n` +
     (zone && zone.zoneType !== "green"
       ? `⚠️ Zone: ${zone.zoneLabel} — ${zone.facilityName}. Please arrange required clearance.\n`
       : `✅ Zone: Green — no restrictions.\n`) +
@@ -475,7 +475,7 @@ export default function BookPage() {
                       <div className="text-xl mb-1">{svc.icon}</div>
                       <p className="font-semibold text-sm">{svc.label}</p>
                       <p className={`text-xs mt-0.5 ${selectedService?.id === svc.id ? "text-white/50" : "text-muted-foreground"}`}>{svc.description}</p>
-                      <p className="text-sm font-bold mt-1.5 text-primary">{inr(svc.price)}+</p>
+                      <p className="text-sm font-bold mt-1.5 text-primary">{inr(svc.price)}{svc.price != null ? "+" : ""}</p>
                     </button>
                   ))}
                 </div>
@@ -506,7 +506,7 @@ export default function BookPage() {
               <div className="flex flex-col items-center py-5 gap-3">
                 <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 <p className="text-sm font-medium text-foreground">Searching pilots near {location}…</p>
-                <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {inr(selectedService?.price || 0)}</p>
+                <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {inr(selectedService?.price ?? null)}{selectedService?.price != null ? "+" : ""}</p>
               </div>
               <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase">Available Pilots</p>
               {rankedPilots.map((p) => (
@@ -557,7 +557,7 @@ export default function BookPage() {
                     <p className="font-mono text-[10px] tracking-wide text-muted-foreground">{selectedService?.icon} {selectedService?.label}</p>
                     <p className="font-mono text-[10px] tracking-wide text-muted-foreground/60">{date || "Date TBD"} · {location}</p>
                   </div>
-                  <span className="font-display text-lg font-bold text-primary">{inr(selectedService?.price || 0)}</span>
+                  <span className="font-display text-lg font-bold text-primary">{inr(selectedService?.price ?? null)}{selectedService?.price != null ? "+" : ""}</span>
                 </div>
               </div>
 
