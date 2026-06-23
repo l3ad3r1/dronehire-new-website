@@ -27,10 +27,10 @@ const ALL_ZONES = new Set([
 ] as any);
 
 const SERVICES = [
-  { id: "realestate", icon: "🏠", label: "Real Estate", price: 3500, description: "Property & land aerial photos" },
-  { id: "wedding",    icon: "💍", label: "Wedding",     price: 5000, description: "Event & ceremony coverage" },
-  { id: "construction", icon: "🏗️", label: "Construction", price: 3000, description: "Progress documentation" },
-  { id: "agriculture",  icon: "🌾", label: "Agriculture",  price: 4000, description: "Land survey & spraying" },
+  { id: "realestate",   icon: "🏠", label: "Real Estate",       price: 12000, description: "Property & land aerial photos" },
+  { id: "wedding",      icon: "💍", label: "Weddings & Events",  price: 18000, description: "Event & ceremony coverage" },
+  { id: "corporate",    icon: "🏢", label: "Corporate & Events", price: 25000, description: "Launches, events & B2B coverage" },
+  { id: "construction", icon: "🏗️", label: "Construction",       price: 0,     description: "Progress documentation", quote: true },
 ];
 
 type Step = 1 | 2 | 3;
@@ -443,7 +443,7 @@ export default function BookPage() {
   }
 
   async function handlePayment() {
-    if (!bookingId || !selectedService) return;
+    if (!bookingId || !selectedService || selectedService.quote) return;
 
     const loaded = await loadRazorpayScript();
     if (!loaded) {
@@ -519,7 +519,7 @@ export default function BookPage() {
     (customerPhone ? `📞 WhatsApp: ${customerPhone}\n` : "") +
     `📍 Location: ${location || "Hyderabad"}\n` +
     `📅 Date: ${date || "TBD"}\n` +
-    `💰 Budget: ${selectedService ? inr(selectedService.price) : ""}+\n` +
+    `💰 Budget: ${selectedService?.quote ? "Custom — request a quote" : selectedService ? inr(selectedService.price) + "+" : ""}\n` +
     (zone && zone.zoneType !== "green"
       ? `⚠️ Zone: ${zone.zoneLabel} — ${zone.facilityName}. Please arrange required clearance.\n`
       : `✅ Zone: Green — no restrictions.\n`) +
@@ -604,7 +604,7 @@ export default function BookPage() {
                       <div className="text-xl mb-1">{svc.icon}</div>
                       <p className="font-semibold text-sm">{svc.label}</p>
                       <p className={`text-xs mt-0.5 ${selectedService?.id === svc.id ? "text-white/50" : "text-muted-foreground"}`}>{svc.description}</p>
-                      <p className="text-sm font-bold mt-1.5 text-primary">{inr(svc.price)}+</p>
+                      <p className="text-sm font-bold mt-1.5 text-primary">{svc.quote ? "Custom — request a quote" : `${inr(svc.price)}+`}</p>
                     </button>
                   ))}
                 </div>
@@ -635,7 +635,7 @@ export default function BookPage() {
               <div className="flex flex-col items-center py-5 gap-3">
                 <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 <p className="text-sm font-medium text-foreground">Searching pilots near {location}…</p>
-                <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {inr(selectedService?.price || 0)}</p>
+                <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {selectedService?.quote ? "Custom" : inr(selectedService?.price || 0)}</p>
               </div>
               <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase">Available Pilots</p>
               {rankedPilots.map((p) => (
@@ -686,7 +686,7 @@ export default function BookPage() {
                     <p className="font-mono text-[10px] tracking-wide text-muted-foreground">{selectedService?.icon} {selectedService?.label}</p>
                     <p className="font-mono text-[10px] tracking-wide text-muted-foreground/60">{date || "Date TBD"} · {location}</p>
                   </div>
-                  <span className="font-display text-lg font-bold text-primary">{inr(selectedService?.price || 0)}</span>
+                  <span className="font-display text-lg font-bold text-primary">{selectedService?.quote ? "Custom" : inr(selectedService?.price || 0)}</span>
                 </div>
               </div>
 
@@ -766,6 +766,32 @@ export default function BookPage() {
                       className="block w-full mt-2 text-xs text-gray-500 hover:text-gray-700 underline">
                       Start a new booking
                     </button>
+                  </div>
+                ) : selectedService?.quote ? (
+                  /* Quote service — route to WhatsApp, no Razorpay */
+                  <div className="flex flex-col gap-2">
+                    <div className="bg-blue-50 border border-blue-200 p-3 text-center rounded-lg">
+                      <p className="font-semibold text-blue-800 text-sm mb-0.5">Request Saved!</p>
+                      <p className="text-xs text-blue-700">Complete your quote request on WhatsApp.</p>
+                    </div>
+                    <a
+                      href={`https://wa.me/919645179861?text=${encodeURIComponent(
+                          `Hi, I'd like to request a quote for a ${selectedService?.label || "Construction"} drone survey.\n` +
+                          (customerName ? `👤 Name: ${customerName}\n` : "") +
+                          (customerPhone ? `📞 WhatsApp: ${customerPhone}\n` : "") +
+                          `📍 Location: ${location || "Hyderabad"}\n` +
+                          `📅 Date: ${date || "TBD"}\n` +
+                          (zone && zone.zoneType !== "green"
+                            ? `⚠️ Zone: ${zone.zoneLabel} — ${zone.facilityName}. Please arrange clearance.\n`
+                            : `✅ Zone: Green — no restrictions.\n`) +
+                          `Pilot: ${matchedPilot?.name ?? "to be assigned"}`
+                        )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 transition-all"
+                    >
+                      <Phone className="w-3.5 h-3.5" /> Request a quote →
+                    </a>
                   </div>
                 ) : (
                   /* Booked but payment pending */
