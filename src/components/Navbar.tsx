@@ -14,7 +14,7 @@ interface NavbarProps {
 
 export function Navbar({
   links = NAV_LINKS,
-  ctaLabel = "Book a shoot →",
+  ctaLabel = "BOOK A DRONE NOW →",
   ctaHref = WHATSAPP_URL,
   ctaExternal = true,
   hideCta = false,

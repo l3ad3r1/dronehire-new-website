@@ -3,7 +3,7 @@ import { Navbar } from "@/components/Navbar";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Book a pilot", href: "/book" },
+  { label: "BOOK A DRONE NOW", href: "/book" },
   { label: "Airspace Map", href: "/map" },
   { label: "Fly with us", href: "/pilots" },
 ];
