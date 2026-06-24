@@ -1,0 +1,21 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- horizontal arm -->
+  <rect x="22" y="46" width="56" height="8" fill="#ff5500"/>
+  <!-- vertical arm -->
+  <rect x="46" y="22" width="8" height="56" fill="#ff5500"/>
+  <!-- central hub -->
+  <circle cx="50" cy="50" r="14" fill="#ff5500"/>
+  <circle cx="50" cy="50" r="6" fill="white"/>
+  <!-- top-left rotor -->
+  <circle cx="17" cy="17" r="13" fill="#3d3d3d"/>
+  <circle cx="17" cy="17" r="5" fill="white"/>
+  <!-- top-right rotor -->
+  <circle cx="83" cy="17" r="13" fill="#3d3d3d"/>
+  <circle cx="83" cy="17" r="5" fill="white"/>
+  <!-- bottom-left rotor -->
+  <circle cx="17" cy="83" r="13" fill="#3d3d3d"/>
+  <circle cx="17" cy="83" r="5" fill="white"/>
+  <!-- bottom-right rotor -->
+  <circle cx="83" cy="83" r="13" fill="#3d3d3d"/>
+  <circle cx="83" cy="83" r="5" fill="white"/>
+</svg>

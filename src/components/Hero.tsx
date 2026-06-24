@@ -157,7 +157,7 @@ export function Hero() {
                   href="/book"
                   className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase hover:bg-primary/90 transition-colors"
                 >
-                  Check pilot availability →
+                  BOOK A DRONE NOW →
                 </a>
                 <a
                   href="/map"
