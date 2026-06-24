@@ -28,7 +28,7 @@ function PlatformSection() {
           <a href="/book" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
             <div className="text-3xl mb-4">📍</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              Book a drone now
+              BOOK A DRONE NOW
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
               Pin your shoot location on the map, check DGCA airspace zones, pick a service and pilot — book via WhatsApp in under 2 minutes.
@@ -74,7 +74,7 @@ export default function HomePage() {
     <div className="min-h-screen overflow-x-hidden">
       <Navbar
         links={HOME_NAV_LINKS}
-        ctaLabel="Book a drone now →"
+        ctaLabel="BOOK A DRONE NOW →"
         ctaHref="/book"
         ctaExternal={false}
       />

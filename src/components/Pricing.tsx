@@ -16,7 +16,7 @@ export function Pricing() {
             const ctaHref = isQuote
               ? `${WHATSAPP_URL}?text=${encodeURIComponent(`Hi, I'd like an enterprise quote for ${tier.name} drone services in Hyderabad. Please share scope and pricing.`)}`
               : "/book";
-            const ctaLabel = isQuote ? "Request a quote →" : "Book a drone now →";
+            const ctaLabel = isQuote ? "Request a quote →" : "BOOK A DRONE NOW →";
             return (
             <div
               key={tier.name}
