@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GALLERY_INTRO, GALLERY_ITEMS } from "@/lib/pilots-content";
 import { PlayIcon, MapPinIcon } from "@/components/icons";
 import type { GalleryItem } from "@/types";
 
 export function FootageGallery() {
   const [active, setActive] = useState<GalleryItem | null>(null);
+  const [items, setItems] = useState<GalleryItem[]>(GALLERY_ITEMS);
+
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((r) => r.ok ? r.json() : [])
+      .then((dynamic: GalleryItem[]) => {
+        if (dynamic.length > 0) setItems([...GALLERY_ITEMS, ...dynamic]);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <section className="py-10 lg:py-16 bg-[#0a0a0a] text-white">
@@ -24,7 +34,7 @@ export function FootageGallery() {
           {GALLERY_INTRO}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {GALLERY_ITEMS.map((item, i) => (
+          {items.map((item, i) => (
             <button
               key={item.title}
               onClick={() => setActive(item)}
