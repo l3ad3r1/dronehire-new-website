@@ -52,15 +52,15 @@ function PlatformSection() {
           </a>
 
           <a href="/game" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
-            <div className="text-3xl mb-4">🎮</div>
+            <div className="text-3xl mb-4">🎓</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              3D drone simulator
+              DRONE TRAINING
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
-              Fly a drone over Hyderabad in our Three.js simulator. WASD controls, live telemetry HUD, AI tour guide, and custom scenarios.
+              Practice drone operations in a risk-free 3D environment. Build flight skills, learn DGCA airspace rules, and prepare for your Remote Pilot Certificate exam.
             </p>
             <span className="font-mono text-xs tracking-wider text-primary group-hover:underline">
-              Launch simulator →
+              Start training →
             </span>
           </a>
         </div>
