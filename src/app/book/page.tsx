@@ -26,10 +26,10 @@ const ALL_ZONES = new Set([
 ] as any);
 
 const SERVICES = [
-  { id: "realestate",  icon: "🏠", label: "Real Estate",       price: 12000 as number | null, description: "Property & land aerial photos" },
-  { id: "wedding",     icon: "💍", label: "Wedding",           price: 18000 as number | null, description: "Event & ceremony coverage" },
-  { id: "corporate",   icon: "🎉", label: "Corporate & Events", price: 25000 as number | null, description: "Product launches & flyovers" },
-  { id: "construction", icon: "🏗️", label: "Construction",    price: null  as number | null, description: "Progress documentation" },
+  { id: "realestate",   icon: "🏠", label: "Real Estate",        price: 12000 as number | null, description: "Property & land aerial photos" },
+  { id: "wedding",      icon: "💍", label: "Weddings & Events",  price: 18000 as number | null, description: "Event & ceremony coverage" },
+  { id: "corporate",    icon: "🏢", label: "Corporate & Events", price: 25000 as number | null, description: "Launches, events & B2B coverage" },
+  { id: "construction", icon: "🏗️", label: "Construction",       price: null  as number | null, description: "Progress documentation" },
 ];
 
 type Step = 1 | 2 | 3;
