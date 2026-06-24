@@ -67,7 +67,7 @@ export const SERVICES: Service[] = [
       "From high-rises in Gachibowli to villas in Jubilee Hills — aerial shots that make listings sell faster. Built for Hyderabad's fast-moving property market.",
     image: "/images/service-real-estate.png",
     imageAlt: "Real estate aerial photography",
-    ctaLabel: "Book a real estate shoot →",
+    ctaLabel: "Book a drone now →",
     whatsappMessage:
       "Hi, I'd like to book a drone shoot for real estate in Hyderabad. Please share available dates and pricing.",
   },
@@ -78,7 +78,7 @@ export const SERVICES: Service[] = [
       "Cinematic aerial coverage — function halls in Kondapur, farmhouses near Shamirpet, rooftops in Banjara Hills. Your guests will ask who did the aerial shots.",
     image: "/images/service-weddings.png",
     imageAlt: "Weddings & events aerial photography",
-    ctaLabel: "Book a wedding shoot →",
+    ctaLabel: "Book a drone now →",
     whatsappMessage:
       "Hi, I'd like to book aerial coverage for my wedding / event in Hyderabad. Please share available dates and pricing.",
   },
@@ -89,7 +89,7 @@ export const SERVICES: Service[] = [
       "Product launches, campus flyovers, open-air concerts — if it happens in Hyderabad and needs a bird's-eye view, we've got a licensed pilot for it.",
     image: "/images/service-corporate.png",
     imageAlt: "Corporate & events aerial photography",
-    ctaLabel: "Book a corporate shoot →",
+    ctaLabel: "Book a drone now →",
     whatsappMessage:
       "Hi, I'd like to book aerial coverage for a corporate event in Hyderabad. Please share available dates and pricing.",
   },
@@ -100,7 +100,7 @@ export const SERVICES: Service[] = [
       "Weekly progress documentation, orthomosaic mapping, and stakeholder-ready reports for sites across the Outer Ring Road and HMDA zones.",
     image: "/images/service-construction.png",
     imageAlt: "Construction & infra aerial photography",
-    ctaLabel: "Book a construction survey →",
+    ctaLabel: "Book a drone now →",
     whatsappMessage:
       "Hi, I'd like to book drone surveys for a construction / infra project in Hyderabad. Please share your recurring survey plans and pricing.",
   },

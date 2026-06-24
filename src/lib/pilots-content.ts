@@ -13,7 +13,7 @@ export const PILOT_NAV_LINKS: NavLink[] = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Requirements", href: "#requirements" },
   { label: "FAQ", href: "#faq" },
-  { label: "Book a shoot", href: "/" },
+  { label: "Book a drone now", href: "/" },
 ];
 
 export const PILOT_HERO_BENEFITS: Benefit[] = [
