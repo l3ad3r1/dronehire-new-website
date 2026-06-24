@@ -7,7 +7,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "BOOK A DRONE NOW", href: "/book" },
-  { label: "Drone Sim", href: "/game" },
+  { label: "Drone Training", href: "/game" },
   { label: "Fly with us", href: "/pilots" },
 ];
 
