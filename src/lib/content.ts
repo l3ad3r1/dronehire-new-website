@@ -246,7 +246,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     title: "Platform",
     links: [
       { label: "Airspace Map", href: "/map" },
-      { label: "Drone Sim", href: "/game" },
+      { label: "Drone Training", href: "/game" },
     ],
   },
   {
