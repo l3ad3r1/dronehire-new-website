@@ -615,21 +615,37 @@ export default function BookPage() {
                     </button>
                   </>
                 ) : (
-                  <div className="bg-green-50 border border-green-200 p-4 text-center">
-                    <p className="font-semibold text-green-800 mb-1">Booking Confirmed!</p>
-                    <p className="text-xs text-green-700 mb-3">
-                      {zone && zone.zoneType !== "green"
-                        ? `Zone notice included — ${matchedPilot?.name} will arrange clearance for ${zone.zoneLabel}.`
-                        : `Connect with ${matchedPilot?.name} to finalise shoot details.`}
-                    </p>
-                    <a href={`https://wa.me/919645179861?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                      <Phone className="w-4 h-4" /> Open WhatsApp
-                    </a>
-                    <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); setCustomerName(""); setCustomerPhone(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
-                      className="block w-full mt-2 text-xs text-gray-500 hover:text-gray-700 underline">
-                      Start a new booking
-                    </button>
+                  <div className="border border-green-200 bg-green-50">
+                    <div className="px-4 pt-4 pb-3 text-center border-b border-green-200">
+                      <p className="font-mono text-[10px] tracking-[0.2em] text-green-700 uppercase mb-1">Request sent ✓</p>
+                      <p className="font-display text-sm font-bold text-green-900">
+                        {zone && zone.zoneType !== "green"
+                          ? `Zone notice included for ${zone.zoneLabel}`
+                          : `${matchedPilot?.name} is standing by`}
+                      </p>
+                    </div>
+                    <div className="px-4 py-3 space-y-2.5">
+                      {[
+                        { n: "1", text: "Open WhatsApp below — your booking details are pre-filled" },
+                        { n: "2", text: "We confirm pilot availability and reply within 2 hrs" },
+                        { n: "3", text: "Pay 50% via UPI to lock your slot — balance after you approve the footage" },
+                      ].map(({ n, text }) => (
+                        <div key={n} className="flex items-start gap-2.5">
+                          <span className="font-mono text-[10px] text-green-700 w-4 shrink-0 mt-0.5">{n}.</span>
+                          <span className="text-xs text-green-800 leading-relaxed">{text}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="px-4 pb-4 flex flex-col gap-2">
+                      <a href={`https://wa.me/919645179861?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
+                        className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 transition-colors">
+                        <Phone className="w-4 h-4" /> Open WhatsApp
+                      </a>
+                      <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); setCustomerName(""); setCustomerPhone(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
+                        className="block w-full text-xs text-gray-500 hover:text-gray-700 underline">
+                        Start a new booking
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
