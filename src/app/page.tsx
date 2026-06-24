@@ -25,16 +25,16 @@ function PlatformSection() {
           EVERYTHING YOU NEED IN ONE PLACE
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
-          <a href="/book" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
-            <div className="text-3xl mb-4">📍</div>
+          <a href="/marketplace" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
+            <div className="text-3xl mb-4">🛒</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              BOOK A DRONE NOW
+              DRONE MARKETPLACE
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
-              Pin your shoot location on the map, check DGCA airspace zones, pick a service and pilot — book via WhatsApp in under 2 minutes.
+              Buy and sell drones, parts and accessories. Built for pilots, dealers and manufacturers. Streamlined marketplace connecting drone buyers, sellers, and service providers.
             </p>
             <span className="font-mono text-xs tracking-wider text-primary group-hover:underline">
-              Open booking map →
+              Coming soon →
             </span>
           </a>
 
