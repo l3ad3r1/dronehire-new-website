@@ -40,6 +40,6 @@ model GallerySubmission {
   location   String
   imageUrl   String
   videoId    String?
-  status     String   @default("approved")
+  status     String   @default("pending")
   createdAt  DateTime @default(now())
 }

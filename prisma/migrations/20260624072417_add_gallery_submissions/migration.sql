@@ -34,7 +34,7 @@ CREATE TABLE "GallerySubmission" (
     "location" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL,
     "videoId" TEXT,
-    "status" TEXT NOT NULL DEFAULT 'approved',
+    "status" TEXT NOT NULL DEFAULT 'pending',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

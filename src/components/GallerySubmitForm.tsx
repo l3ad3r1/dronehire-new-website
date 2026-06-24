@@ -68,9 +68,9 @@ export function GallerySubmitForm() {
     return (
       <div className="flex flex-col items-center gap-4 py-10 text-center">
         <CheckCircle className="w-12 h-12 text-green-500" />
-        <h3 className="font-display text-lg font-bold tracking-tight text-white">Footage submitted</h3>
+        <h3 className="font-display text-lg font-bold tracking-tight text-white">Footage received</h3>
         <p className="font-mono text-xs text-white/50 max-w-xs">
-          Your clip is now live in the gallery. Thank you for contributing to the portfolio.
+          Your clip is pending review. We&apos;ll approve it and add it to the gallery shortly.
         </p>
         <button
           onClick={() => setStatus("idle")}

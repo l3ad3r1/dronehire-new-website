@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         location,
         imageUrl,
         videoId: videoId || null,
-        status: "approved",
+        status: "pending",
       },
     });
 
