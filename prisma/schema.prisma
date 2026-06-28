@@ -43,3 +43,10 @@ model GallerySubmission {
   status     String   @default("pending")
   createdAt  DateTime @default(now())
 }
+
+model Lead {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("marketplace")
+  createdAt DateTime @default(now())
+}
