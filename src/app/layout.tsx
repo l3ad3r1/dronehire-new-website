@@ -1,7 +1,33 @@
 import type { Metadata } from "next";
 import { Inter, Syncopate, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { EMAIL } from "@/lib/content";
 import "./globals.css";
+
+const LOCAL_BUSINESS_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "DroneHire",
+  description:
+    "Hire DGCA-licensed drone pilots in Hyderabad for real estate, weddings, construction, and events. Book in minutes via WhatsApp. Pay after your shoot.",
+  url: "https://dronehire-new-website.vercel.app",
+  image: "https://dronehire-new-website.vercel.app/images/hero-cityscape.png",
+  telephone: "+91 9645179861",
+  email: EMAIL,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Hyderabad",
+    addressRegion: "Telangana",
+    addressCountry: "IN",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 17.385,
+    longitude: 78.4867,
+  },
+  areaServed: "Hyderabad",
+  priceRange: "₹₹",
+};
 
 const inter = Inter({
   subsets: ["latin"],
@@ -57,6 +83,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${syncopate.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSON_LD) }}
+        />
         {children}
         <Analytics />
       </body>
