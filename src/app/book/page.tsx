@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { fetchPilots, haversineKm, FALLBACK_PILOTS, type Pilot } from "@/lib/pilots";
 import { APPS_SCRIPT_URL } from "@/lib/config";
+import { toast } from "sonner";
 
 const BOOK_NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -26,10 +27,10 @@ const ALL_ZONES = new Set([
 ] as any);
 
 const SERVICES = [
-  { id: "realestate", icon: "🏠", label: "Real Estate", price: 3500, description: "Property & land aerial photos" },
-  { id: "wedding",    icon: "💍", label: "Wedding",     price: 5000, description: "Event & ceremony coverage" },
-  { id: "construction", icon: "🏗️", label: "Construction", price: 3000, description: "Progress documentation" },
-  { id: "agriculture",  icon: "🌾", label: "Agriculture",  price: 4000, description: "Land survey & spraying" },
+  { id: "realestate",   icon: "🏠", label: "Real Estate",       price: 12000, description: "Property & land aerial photos" },
+  { id: "wedding",      icon: "💍", label: "Weddings & Events",  price: 18000, description: "Event & ceremony coverage" },
+  { id: "corporate",    icon: "🏢", label: "Corporate & Events", price: 25000, description: "Launches, events & B2B coverage" },
+  { id: "construction", icon: "🏗️", label: "Construction",       price: 0,     description: "Progress documentation", quote: true },
 ];
 
 type Step = 1 | 2 | 3;
@@ -97,6 +98,31 @@ function ZoneBanner({ zone }: { zone: ZoneCheckResult | null }) {
   );
 }
 
+// Declare Razorpay on window for TypeScript
+declare global {
+  interface Window {
+    Razorpay: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, handler: (data: unknown) => void) => void;
+    };
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (document.getElementById("razorpay-checkout-js")) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "razorpay-checkout-js";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export default function BookPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -121,6 +147,12 @@ export default function BookPage() {
   const [booked, setBooked] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+
+  // Payment flow state
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [paymentDone, setPaymentDone] = useState(false);
 
   // Pilots ranked by distance from the pinned location (nearest first).
   const rankedPilots = useMemo<RankedPilot[]>(() => {
@@ -354,30 +386,127 @@ export default function BookPage() {
     if (!selectedService || !coords) return;
     setAppearedPilots(new Set());
     setBooked(false);
+    setBookingId(null);
+    setPaymentDone(false);
     setStep(2);
   }
 
-  function confirmBooking() {
-    // Record the booking in the Google Sheet (fire-and-forget; safe to fail).
-    if (APPS_SCRIPT_URL) {
-      fetch(APPS_SCRIPT_URL, {
+  async function confirmBooking() {
+    if (!customerName.trim() || customerPhone.replace(/\D/g, "").length < 10) return;
+    setBookingSubmitting(true);
+    try {
+      // Persist booking via API
+      const res = await fetch("/api/book", {
         method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          formType: "booking",
           customerName,
           phone: customerPhone,
-          service: selectedService?.label ?? "",
+          service: selectedService?.id ?? "",
           location,
           date,
-          pilotId: matchedPilot?.id ?? "",
-          pilot: matchedPilot?.name ?? "",
-          zone: zone?.zoneLabel ?? "Green",
+          email: customerEmail || undefined,
         }),
-      }).catch(() => {});
+      });
+      const data = await res.json() as { id?: string; error?: string };
+      if (!res.ok || !data.id) {
+        toast.error(data.error ?? "Failed to create booking. Please try again.");
+        return;
+      }
+      setBookingId(data.id);
+      setBooked(true);
+
+      // Fire-and-forget to Google Sheet (WhatsApp fallback path)
+      if (APPS_SCRIPT_URL) {
+        fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            formType: "booking",
+            customerName,
+            phone: customerPhone,
+            service: selectedService?.label ?? "",
+            location,
+            date,
+            pilotId: matchedPilot?.id ?? "",
+            pilot: matchedPilot?.name ?? "",
+            zone: zone?.zoneLabel ?? "Green",
+          }),
+        }).catch(() => {});
+      }
+    } catch {
+      toast.error("Network error — please try again.");
+    } finally {
+      setBookingSubmitting(false);
     }
-    setBooked(true);
+  }
+
+  async function handlePayment() {
+    if (!bookingId || !selectedService || selectedService.quote) return;
+
+    const loaded = await loadRazorpayScript();
+    if (!loaded) {
+      toast.error("Could not load payment gateway. Please try again.");
+      return;
+    }
+
+    const orderRes = await fetch("/api/payment/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId }),
+    });
+    const orderData = await orderRes.json() as {
+      orderId?: string;
+      amount?: number;
+      currency?: string;
+      keyId?: string;
+      error?: string;
+    };
+    if (!orderRes.ok || !orderData.orderId) {
+      toast.error(orderData.error ?? "Failed to initiate payment.");
+      return;
+    }
+
+    const rzp = new window.Razorpay({
+      key: orderData.keyId,
+      amount: orderData.amount,
+      currency: orderData.currency ?? "INR",
+      order_id: orderData.orderId,
+      name: "DroneHire",
+      description: `${selectedService.label} shoot — ${location}`,
+      prefill: {
+        name: customerName,
+        contact: customerPhone,
+        email: customerEmail || undefined,
+      },
+      theme: { color: "#ff5500" },
+      handler: async (response: unknown) => {
+        const r = response as {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        };
+        const verifyRes = await fetch("/api/payment/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            razorpay_order_id: r.razorpay_order_id,
+            razorpay_payment_id: r.razorpay_payment_id,
+            razorpay_signature: r.razorpay_signature,
+            bookingId,
+          }),
+        });
+        const verifyData = await verifyRes.json() as { success?: boolean; error?: string };
+        if (verifyData.success) {
+          setPaymentDone(true);
+          toast.success("Payment confirmed! Your booking is now confirmed.");
+        } else {
+          toast.error(verifyData.error ?? "Payment verification failed. Contact support.");
+        }
+      },
+    });
+    rzp.open();
   }
 
   const zoneLabel = zone
@@ -390,7 +519,7 @@ export default function BookPage() {
     (customerPhone ? `📞 WhatsApp: ${customerPhone}\n` : "") +
     `📍 Location: ${location || "Hyderabad"}\n` +
     `📅 Date: ${date || "TBD"}\n` +
-    `💰 Budget: ${selectedService ? inr(selectedService.price) : ""}+\n` +
+    `💰 Budget: ${selectedService?.quote ? "Custom — request a quote" : selectedService ? inr(selectedService.price) + "+" : ""}\n` +
     (zone && zone.zoneType !== "green"
       ? `⚠️ Zone: ${zone.zoneLabel} — ${zone.facilityName}. Please arrange required clearance.\n`
       : `✅ Zone: Green — no restrictions.\n`) +
@@ -475,7 +604,7 @@ export default function BookPage() {
                       <div className="text-xl mb-1">{svc.icon}</div>
                       <p className="font-semibold text-sm">{svc.label}</p>
                       <p className={`text-xs mt-0.5 ${selectedService?.id === svc.id ? "text-white/50" : "text-muted-foreground"}`}>{svc.description}</p>
-                      <p className="text-sm font-bold mt-1.5 text-primary">{inr(svc.price)}+</p>
+                      <p className="text-sm font-bold mt-1.5 text-primary">{svc.quote ? "Custom — request a quote" : `${inr(svc.price)}+`}</p>
                     </button>
                   ))}
                 </div>
@@ -506,7 +635,7 @@ export default function BookPage() {
               <div className="flex flex-col items-center py-5 gap-3">
                 <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 <p className="text-sm font-medium text-foreground">Searching pilots near {location}…</p>
-                <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {inr(selectedService?.price || 0)}</p>
+                <p className="font-mono text-[10px] text-muted-foreground tracking-wide">{selectedService?.label} · {selectedService?.quote ? "Custom" : inr(selectedService?.price || 0)}</p>
               </div>
               <p className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase">Available Pilots</p>
               {rankedPilots.map((p) => (
@@ -557,7 +686,7 @@ export default function BookPage() {
                     <p className="font-mono text-[10px] tracking-wide text-muted-foreground">{selectedService?.icon} {selectedService?.label}</p>
                     <p className="font-mono text-[10px] tracking-wide text-muted-foreground/60">{date || "Date TBD"} · {location}</p>
                   </div>
-                  <span className="font-display text-lg font-bold text-primary">{inr(selectedService?.price || 0)}</span>
+                  <span className="font-display text-lg font-bold text-primary">{selectedService?.quote ? "Custom" : inr(selectedService?.price || 0)}</span>
                 </div>
               </div>
 
@@ -594,6 +723,13 @@ export default function BookPage() {
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     placeholder="WhatsApp number (e.g. 98765 43210)"
+                    className="w-full mb-2 px-3 py-2.5 border border-border bg-card text-sm focus:outline-none focus:border-primary transition-colors"
+                  />
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="Email (optional, for receipt)"
                     className="w-full px-3 py-2.5 border border-border bg-card text-sm focus:outline-none focus:border-primary transition-colors"
                   />
                   <p className="font-mono text-[10px] text-muted-foreground/70 mt-1 tracking-wide">We&apos;ll confirm your shoot on this WhatsApp number.</p>
@@ -605,31 +741,82 @@ export default function BookPage() {
                   <>
                     <button
                       onClick={confirmBooking}
-                      disabled={!customerName.trim() || customerPhone.replace(/\D/g, "").length < 10}
+                      disabled={bookingSubmitting || !customerName.trim() || customerPhone.replace(/\D/g, "").length < 10}
                       className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
-                      Accept & Book <ChevronRight className="w-4 h-4" />
+                      {bookingSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
+                      {bookingSubmitting ? "Saving…" : "Accept & Book"}
                     </button>
                     <button onClick={() => { setAppearedPilots(new Set()); setStep(2); }} className="w-full py-2.5 border border-border font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground flex items-center justify-center gap-2 hover:border-foreground transition-colors">
                       <RefreshCw className="w-3.5 h-3.5" /> Try Another
                     </button>
                   </>
-                ) : (
+                ) : paymentDone ? (
+                  /* Payment completed */
                   <div className="bg-green-50 border border-green-200 p-4 text-center">
-                    <p className="font-semibold text-green-800 mb-1">Booking Confirmed!</p>
+                    <p className="font-semibold text-green-800 mb-1">Payment Confirmed!</p>
                     <p className="text-xs text-green-700 mb-3">
-                      {zone && zone.zoneType !== "green"
-                        ? `Zone notice included — ${matchedPilot?.name} will arrange clearance for ${zone.zoneLabel}.`
-                        : `Connect with ${matchedPilot?.name} to finalise shoot details.`}
+                      Your booking is confirmed. {matchedPilot?.name} will be in touch shortly.
                     </p>
                     <a href={`https://wa.me/919645179861?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
                       <Phone className="w-4 h-4" /> Open WhatsApp
                     </a>
-                    <button onClick={() => { setStep(1); setBooked(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); setCustomerName(""); setCustomerPhone(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
+                    <button onClick={() => { setStep(1); setBooked(false); setBookingId(null); setPaymentDone(false); setSelectedService(null); setCoords(null); setZone(null); setLocation(""); setDate(""); setSelectedPilotId(""); setCustomerName(""); setCustomerPhone(""); setCustomerEmail(""); if (pinMarkerRef.current) { pinMarkerRef.current.remove(); pinMarkerRef.current = null; } }}
                       className="block w-full mt-2 text-xs text-gray-500 hover:text-gray-700 underline">
                       Start a new booking
                     </button>
+                  </div>
+                ) : selectedService?.quote ? (
+                  /* Quote service — route to WhatsApp, no Razorpay */
+                  <div className="flex flex-col gap-2">
+                    <div className="bg-blue-50 border border-blue-200 p-3 text-center rounded-lg">
+                      <p className="font-semibold text-blue-800 text-sm mb-0.5">Request Saved!</p>
+                      <p className="text-xs text-blue-700">Complete your quote request on WhatsApp.</p>
+                    </div>
+                    <a
+                      href={`https://wa.me/919645179861?text=${encodeURIComponent(
+                          `Hi, I'd like to request a quote for a ${selectedService?.label || "Construction"} drone survey.\n` +
+                          (customerName ? `👤 Name: ${customerName}\n` : "") +
+                          (customerPhone ? `📞 WhatsApp: ${customerPhone}\n` : "") +
+                          `📍 Location: ${location || "Hyderabad"}\n` +
+                          `📅 Date: ${date || "TBD"}\n` +
+                          (zone && zone.zoneType !== "green"
+                            ? `⚠️ Zone: ${zone.zoneLabel} — ${zone.facilityName}. Please arrange clearance.\n`
+                            : `✅ Zone: Green — no restrictions.\n`) +
+                          `Pilot: ${matchedPilot?.name ?? "to be assigned"}`
+                        )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 transition-all"
+                    >
+                      <Phone className="w-3.5 h-3.5" /> Request a quote →
+                    </a>
+                  </div>
+                ) : (
+                  /* Booked but payment pending */
+                  <div className="flex flex-col gap-2">
+                    <div className="bg-blue-50 border border-blue-200 p-3 text-center rounded-lg">
+                      <p className="font-semibold text-blue-800 text-sm mb-0.5">Booking Saved!</p>
+                      <p className="text-xs text-blue-700">Complete payment to confirm your slot.</p>
+                    </div>
+                    {/* Pay now — primary CTA */}
+                    <button
+                      onClick={handlePayment}
+                      className="w-full py-3 bg-primary text-primary-foreground font-mono text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-primary/90 transition-all"
+                    >
+                      Pay {selectedService ? inr(selectedService.price) : ""} Now
+                    </button>
+                    {/* WhatsApp fallback */}
+                    <a href={`https://wa.me/919645179861?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
+                      className="w-full py-2.5 border border-border font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground flex items-center justify-center gap-2 hover:border-foreground transition-colors">
+                      <Phone className="w-3.5 h-3.5" /> Pay via WhatsApp instead
+                    </a>
+                    {zone && zone.zoneType !== "green" && (
+                      <p className="font-mono text-[10px] text-muted-foreground/70 text-center tracking-wide">
+                        Zone notice included — {matchedPilot?.name} will arrange clearance for {zone.zoneLabel}.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
