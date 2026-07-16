@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 
 const schema = z.object({
-  email: z.string().email(),
+  email: z.string().email().max(254),
   source: z.string().max(50).optional().default("marketplace"),
 });
 

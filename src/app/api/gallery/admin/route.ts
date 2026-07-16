@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 
-function authorized(token: string | null): boolean {
+// Token is sent via "Authorization: Bearer <token>" header (never in the URL,
+// where it would leak into request logs).
+function authorized(req: Request): boolean {
   const secret = process.env.GALLERY_ADMIN_TOKEN;
-  return !!secret && token === secret;
+  const header = req.headers.get("authorization") ?? "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!secret || !token) return false;
+  const a = Buffer.from(token);
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
-// GET /api/gallery/admin?token=X
+// GET /api/gallery/admin
 // Returns all pending submissions so you can review them before approving.
 export async function GET(req: Request) {
-  const token = new URL(req.url).searchParams.get("token");
-  if (!authorized(token)) {
+  if (!authorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -23,14 +30,15 @@ export async function GET(req: Request) {
 }
 
 // POST /api/gallery/admin
-// Body: { id: string, action: "approve" | "reject", token: string }
+// Header: Authorization: Bearer <token>
+// Body: { id: string, action: "approve" | "reject" }
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  const { id, action, token } = body as Record<string, string>;
-
-  if (!authorized(token)) {
+  if (!authorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const body = await req.json().catch(() => ({}));
+  const { id, action } = body as Record<string, string>;
 
   if (!id || (action !== "approve" && action !== "reject")) {
     return NextResponse.json(
