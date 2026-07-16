@@ -5,6 +5,7 @@ import { StatBar } from "@/components/StatBar";
 import { Process } from "@/components/Process";
 import { Services } from "@/components/Services";
 import { WhyUs } from "@/components/WhyUs";
+import { FootageGallery } from "@/components/FootageGallery";
 import { Pricing } from "@/components/Pricing";
 import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
@@ -85,6 +86,7 @@ export default function HomePage() {
         <Process />
         <Services />
         <WhyUs />
+        <FootageGallery />
         <Pricing />
         <Faq items={FAQS} />
         <PlatformSection />

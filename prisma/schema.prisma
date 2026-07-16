@@ -21,27 +21,45 @@ model Pilot {
 }
 
 model Booking {
-  id          String   @id @default(cuid())
-  customerName String
-  phone       String
-  service     String
-  location    String
-  date        String
-  status      String   @default("pending")
-  pilotId     String?
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  customerName  String
+  phone         String
+  service       String
+  location      String
+  date          String
+  status        String   @default("pending")
+  pilotId       String?
+  createdAt     DateTime @default(now())
+  email         String?
+  amount        Int?
+  paymentStatus String   @default("unpaid")
+  paymentId     String?
 }
 
 model GallerySubmission {
-  id         String   @id @default(cuid())
-  pilotName  String
-  badge      String
-  title      String
-  location   String
-  imageUrl   String
-  videoId    String?
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  pilotName String
+  badge     String
+  title     String
+  location  String
+  imageUrl  String
+  videoId   String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model PilotApplication {
+  id          String   @id @default(cuid())
+  name        String
+  whatsapp    String   @unique
+  areas       String
+  dgcaId      String
+  experience  String?
+  droneModels String
+  shootTypes  String?
+  notes       String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
 }
 
 model Lead {
