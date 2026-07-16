@@ -3,14 +3,14 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 
 const schema = z.object({
-  name:        z.string().min(1),
-  whatsapp:    z.string().min(10),
-  areas:       z.string().min(1),
-  dgcaId:      z.string().min(1),
-  experience:  z.string().optional(),
-  droneModels: z.string().min(1),
-  shootTypes:  z.string().optional(),
-  notes:       z.string().optional(),
+  name:        z.string().min(1).max(100),
+  whatsapp:    z.string().min(10).max(20),
+  areas:       z.string().min(1).max(300),
+  dgcaId:      z.string().min(1).max(50),
+  experience:  z.string().max(100).optional(),
+  droneModels: z.string().min(1).max(300),
+  shootTypes:  z.string().max(300).optional(),
+  notes:       z.string().max(1000).optional(),
 });
 
 export async function POST(req: NextRequest) {

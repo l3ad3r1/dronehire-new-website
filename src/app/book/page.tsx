@@ -3,7 +3,7 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState, useCallback, useMemo, type KeyboardEvent } from "react";
 import { MapPin, Calendar, ChevronRight, Star, Shield, AlertTriangle, XCircle, CheckCircle, RefreshCw, Phone, Search, Loader2 } from "lucide-react";
-import { FACILITIES } from "@/data/facilities";
+import { FACILITIES, type ZoneFilterId } from "@/data/facilities";
 import { generateZoneGeoJSON, checkPointZone } from "@/lib/airspace";
 import type { ZoneCheckResult } from "@/lib/airspace";
 import { Navbar } from "@/components/Navbar";
@@ -19,11 +19,10 @@ const BOOK_NAV_LINKS = [
 ];
 
 // All zones active for display
-const ALL_ZONES = new Set([
-  "airport-red", "airport-inner-yellow", "airport-outer-yellow",
-  "boundary", "temp-red", "helipad-red", "helipad-yellow",
-  "abandoned-red", "abandoned-yellow",
-] as any);
+const ALL_ZONES = new Set<ZoneFilterId>([
+  "airport-red", "airport-inner", "airport-outer", "runway",
+  "boundary", "temp-red", "helipad-red", "abandoned-red",
+]);
 
 const SERVICES = [
   { id: "realestate",   icon: "🏠", label: "Real Estate",        price: 12000 as number | null, description: "Property & land aerial photos" },
