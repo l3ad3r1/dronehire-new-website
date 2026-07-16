@@ -21,15 +21,19 @@ model Pilot {
 }
 
 model Booking {
-  id          String   @id @default(cuid())
-  customerName String
-  phone       String
-  service     String
-  location    String
-  date        String
-  status      String   @default("pending")
-  pilotId     String?
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  customerName  String
+  phone         String
+  service       String
+  location      String
+  date          String
+  status        String   @default("pending")
+  pilotId       String?
+  createdAt     DateTime @default(now())
+  email         String?
+  amount        Int?
+  paymentStatus String   @default("unpaid")
+  paymentId     String?
 }
 
 model GallerySubmission {
