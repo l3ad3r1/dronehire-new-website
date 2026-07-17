@@ -17,7 +17,7 @@ All audit bugs from Dronehire.md fixed across two rounds (commits `17525d4` and 
 
 ## Deployment
 - Platform: Vercel (auto-deploys from `l3ad3r1/dronehire-new-website` master)
-- Live: https://dronehire-new-website.vercel.app
+- Live: https://dronehire.vercel.app
 - `next.config.ts`: minimal SSR config, no static export
 - All changes pushed; Vercel build triggered on commit `0fcb2c4`
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Syncopate, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { EMAIL } from "@/lib/content";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const LOCAL_BUSINESS_JSON_LD = {
@@ -10,8 +11,8 @@ const LOCAL_BUSINESS_JSON_LD = {
   name: "DroneHire",
   description:
     "Hire DGCA-licensed drone pilots in Hyderabad for real estate, weddings, construction, and events. Book in minutes via WhatsApp. Pay after your shoot.",
-  url: "https://dronehire-new-website.vercel.app",
-  image: "https://dronehire-new-website.vercel.app/images/hero-cityscape.png",
+  url: SITE_URL,
+  image: `${SITE_URL}/images/hero-cityscape.png`,
   telephone: "+91 9645179861",
   email: EMAIL,
   address: {
@@ -49,14 +50,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dronehire-new-website.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: "DroneHire — Book DGCA-Licensed Drone Pilots in Hyderabad",
   description:
     "Hire DGCA-licensed drone pilots in Hyderabad for real estate, weddings, construction, and events. Book in minutes via WhatsApp. Pay after your shoot.",
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://dronehire-new-website.vercel.app",
+    url: SITE_URL,
     siteName: "DroneHire",
     title: "DroneHire — Book DGCA-Licensed Drone Pilots in Hyderabad",
     description:
