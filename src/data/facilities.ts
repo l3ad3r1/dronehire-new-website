@@ -175,6 +175,11 @@ export const FACILITIES: Facility[] = [
   // === TEMPORARY RED ZONES (examples) ===
   { id: "TEMP_RED_1", name: "Republic Day Restricted Zone (Temporary)", type: "temporary_red_zone", lat: 28.6200, lng: 77.2400, zones: {} },
   { id: "TEMP_RED_2", name: "Independence Day Restricted Zone (Temporary)", type: "temporary_red_zone", lat: 28.6200, lng: 77.2400, zones: {} },
+
+  // === HYDERABAD LOCAL ADDITIONS ===
+  { id: "HYD-BEG", name: "Begumpet Airport", type: "military", lat: 17.4531, lng: 78.4676, icao: "VOHY", zones: { red: { radius: 4.0 } } },
+  { id: "HYD-SEC", name: "Telangana Secretariat & Assembly", type: "government", lat: 17.411, lng: 78.475, zones: { red: { radius: 1.5 } } },
+  { id: "HYD-CANT", name: "Secunderabad Military Cantonment", type: "military", lat: 17.485, lng: 78.513, zones: { red: { radius: 0.0 }, innerYellow: { radius: 3.0 } } },
 ];
 
 // Helper to get zone radii for a facility (uses default if not specified)
