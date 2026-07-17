@@ -290,74 +290,7 @@ export function checkPointZone(lat: number, lng: number, facilities: Facility[])
     const radii = getZoneRadii(facility);
     const center: [number, number] = [facility.lng, facility.lat];
 
-    // Check approach paths first
-    if (facility.approachPaths) {
-      for (const approach of facility.approachPaths) {
-        const approachPoly = generateApproachPolygon(facility, approach);
-        if (approachPoly) {
-          try {
-            if (booleanPointInPolygon(pt, approachPoly)) {
-              const dist = calculateDistance(lat, lng, facility.lat, facility.lng);
-              if (dist < minDistance) {
-                minDistance = dist;
-                closest = {
-                  zoneType: "approach",
-                  zoneLabel: "Approach Path",
-                  facilityName: facility.name,
-                  facilityType: facility.type,
-                  distance: dist,
-                  description: "Approach path zone. Permission required from ATC for drone operations.",
-                };
-              }
-            }
-          } catch {}
-        }
-      }
-    }
-
-    // Check outer yellow first (largest)
-    if (radii.outerYellow > 0) {
-      try {
-        const outerYellowPoly = circle(center, radii.outerYellow, { steps: 32, units: "kilometers" });
-        if (booleanPointInPolygon(pt, outerYellowPoly)) {
-          const dist = calculateDistance(lat, lng, facility.lat, facility.lng);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closest = {
-              zoneType: "outer-yellow",
-              zoneLabel: "Outer Yellow Zone",
-              facilityName: facility.name,
-              facilityType: facility.type,
-              distance: dist,
-              description: "Permission required from ATC. Area 8-12km from airport perimeter.",
-            };
-          }
-        }
-      } catch {}
-    }
-
-    // Check inner yellow
-    if (radii.innerYellow > 0) {
-      try {
-        const innerYellowPoly = circle(center, radii.innerYellow, { steps: 32, units: "kilometers" });
-        if (booleanPointInPolygon(pt, innerYellowPoly)) {
-          const dist = calculateDistance(lat, lng, facility.lat, facility.lng);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closest = {
-              zoneType: "inner-yellow",
-              zoneLabel: "Inner Yellow Zone",
-              facilityName: facility.name,
-              facilityType: facility.type,
-              distance: dist,
-              description: "Permission required from ATC. Area 5-8km from airport perimeter.",
-            };
-          }
-        }
-      } catch {}
-    }
-
-    // Check red zone (most restrictive)
+    // Check red zone (most restrictive) first so it wins ties in distance
     if (radii.red > 0) {
       try {
         const redPoly = circle(center, radii.red, { steps: 32, units: "kilometers" });
@@ -394,6 +327,73 @@ export function checkPointZone(lat: number, lng: number, facilities: Facility[])
           }
         }
       } catch {}
+    }
+
+    // Check inner yellow
+    if (radii.innerYellow > 0) {
+      try {
+        const innerYellowPoly = circle(center, radii.innerYellow, { steps: 32, units: "kilometers" });
+        if (booleanPointInPolygon(pt, innerYellowPoly)) {
+          const dist = calculateDistance(lat, lng, facility.lat, facility.lng);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closest = {
+              zoneType: "inner-yellow",
+              zoneLabel: "Inner Yellow Zone",
+              facilityName: facility.name,
+              facilityType: facility.type,
+              distance: dist,
+              description: "Permission required from ATC. Area 5-8km from airport perimeter.",
+            };
+          }
+        }
+      } catch {}
+    }
+
+    // Check outer yellow
+    if (radii.outerYellow > 0) {
+      try {
+        const outerYellowPoly = circle(center, radii.outerYellow, { steps: 32, units: "kilometers" });
+        if (booleanPointInPolygon(pt, outerYellowPoly)) {
+          const dist = calculateDistance(lat, lng, facility.lat, facility.lng);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closest = {
+              zoneType: "outer-yellow",
+              zoneLabel: "Outer Yellow Zone",
+              facilityName: facility.name,
+              facilityType: facility.type,
+              distance: dist,
+              description: "Permission required from ATC. Area 8-12km from airport perimeter.",
+            };
+          }
+        }
+      } catch {}
+    }
+
+    // Check approach paths
+    if (facility.approachPaths) {
+      for (const approach of facility.approachPaths) {
+        const approachPoly = generateApproachPolygon(facility, approach);
+        if (approachPoly) {
+          try {
+            if (booleanPointInPolygon(pt, approachPoly)) {
+              const dist = calculateDistance(lat, lng, facility.lat, facility.lng);
+              if (dist < minDistance) {
+                minDistance = dist;
+                closest = {
+                  zoneType: "approach",
+                  zoneLabel: "Approach Path",
+                  facilityName: facility.name,
+                  facilityType: facility.type,
+                  distance: dist,
+                  description: "Approach path zone. Permission required from ATC for drone operations.",
+                };
+              }
+            }
+          } catch {}
+        }
+      }
     }
   }
 
