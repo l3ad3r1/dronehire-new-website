@@ -24,6 +24,7 @@ interface NotamPanelProps {
 
 export function NotamPanel({ visible, onClose, onFlyTo }: NotamPanelProps) {
   const [notams, setNotams] = useState<Notam[]>([]);
+  const [isSampleData, setIsSampleData] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "N" | "R" | "C">("all");
@@ -43,6 +44,7 @@ export function NotamPanel({ visible, onClose, onFlyTo }: NotamPanelProps) {
       if (!res.ok) throw new Error("Failed to fetch NOTAMs");
       const data = await res.json();
       setNotams(data.notams || []);
+      setIsSampleData(data.source === "sample");
     } catch (err: any) {
       setError(err.message || "Failed to load NOTAMs");
     } finally {
@@ -83,8 +85,12 @@ export function NotamPanel({ visible, onClose, onFlyTo }: NotamPanelProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <span className="text-sm font-semibold text-gray-800">NOTAMs</span>
-            <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full font-medium">
-              {notams.length} active
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                isSampleData ? "bg-gray-200 text-gray-600" : "bg-orange-100 text-orange-700"
+              }`}
+            >
+              {notams.length} {isSampleData ? "sample" : "active"}
             </span>
           </div>
           <button
@@ -96,6 +102,17 @@ export function NotamPanel({ visible, onClose, onFlyTo }: NotamPanelProps) {
             </svg>
           </button>
         </div>
+
+        {/* Demo-data warning */}
+        {isSampleData && !loading && (
+          <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 flex-shrink-0">
+            <p className="text-[11px] leading-snug text-amber-800 font-medium">
+              ⚠ Demo data only — these are illustrative sample NOTAMs, not live
+              airspace notices. Do not use for flight planning. Check official
+              AAI/DGCA sources before flying.
+            </p>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="px-4 py-3 border-b border-gray-100 space-y-2 flex-shrink-0">

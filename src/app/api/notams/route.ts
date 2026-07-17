@@ -245,56 +245,24 @@ export async function GET(request: Request) {
     return NextResponse.json(notamCache.data);
   }
 
-  try {
-    // Try to fetch from the ICAO NOTAM API (if available)
-    // The ICAO API at https://www.icao.int/safety/ais/ is not publicly accessible via API
-    // DGCA DigitalSky also doesn't provide a public NOTAM API
-    // We attempt the ICAO Easter NOTAM portal, but it typically requires authentication
+  // No free public NOTAM API covers Indian FIRs (AAI/ICAO iSTARS/DigitalSky all
+  // require credentials), so this endpoint serves clearly-labeled DEMO data.
+  // Consumers MUST check `source === "sample"` and warn users that these are
+  // not real airspace notices. If a real feed is integrated later, set
+  // `source: "live"` so the UI drops its demo-data warning.
+  const fir = request.url ? new URL(request.url).searchParams.get("fir") : null;
+  const firs = fir ? [fir] : INDIAN_FIRS;
+  const notams = SAMPLE_NOTAMS.filter((n) => firs.includes(n.fir));
 
-    // For production, you would integrate with:
-    // 1. AAI (Airports Authority of India) NOTAM service
-    // 2. ICAO iSTARS NOTAM API (requires API key)
-    // 3. DGCA DigitalSky API (when available)
+  const result = {
+    notams,
+    count: notams.length,
+    firs: INDIAN_FIRS,
+    source: "sample",
+    note: "DEMO DATA — illustrative sample NOTAMs, not live airspace notices. Do not use for flight planning.",
+    lastUpdated: new Date().toISOString(),
+  };
 
-    // Attempt to fetch from a public NOTAM source
-    let notams: typeof SAMPLE_NOTAMS = [];
-
-    try {
-      // Try the public NOTAM feed (ICAO format)
-      // Note: This is a best-effort attempt; many NOTAM APIs require authentication
-      const fir = request.url ? new URL(request.url).searchParams.get("fir") : null;
-      const firs = fir ? [fir] : INDIAN_FIRS;
-
-      // Use the sample data as the primary source
-      // In a production environment, this would be replaced with actual API calls
-      notams = SAMPLE_NOTAMS.filter((n) => firs.includes(n.fir));
-    } catch {
-      notams = SAMPLE_NOTAMS;
-    }
-
-    const result = {
-      notams,
-      count: notams.length,
-      firs: INDIAN_FIRS,
-      source: "sample",
-      note: "NOTAMs shown are sample data. For real-time NOTAMs, integrate with AAI or ICAO API.",
-      lastUpdated: new Date().toISOString(),
-    };
-
-    notamCache = { timestamp: Date.now(), data: result };
-    return NextResponse.json(result);
-  } catch (error) {
-    // Return sample data on error
-    const result = {
-      notams: SAMPLE_NOTAMS,
-      count: SAMPLE_NOTAMS.length,
-      firs: INDIAN_FIRS,
-      source: "sample",
-      note: "Using sample data due to API error.",
-      lastUpdated: new Date().toISOString(),
-    };
-
-    notamCache = { timestamp: Date.now(), data: result };
-    return NextResponse.json(result);
-  }
+  notamCache = { timestamp: Date.now(), data: result };
+  return NextResponse.json(result);
 }
