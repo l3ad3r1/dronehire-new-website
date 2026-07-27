@@ -316,6 +316,31 @@ export default function BookPage() {
     };
   }, [reverseGeocode, placePin]);
 
+  // Carry the first photo position into booking when the user arrives from Mission Studio.
+  useEffect(() => {
+    if (!mapReady || coords) return;
+    try {
+      const rawMission = localStorage.getItem("dronehire-mission");
+      if (!rawMission) return;
+      const mission = JSON.parse(rawMission) as {
+        name?: string;
+        location?: { lat?: number; lng?: number };
+        waypointCount?: number;
+      };
+      const lat = Number(mission.location?.lat);
+      const lng = Number(mission.location?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      const label = mission.name || "Planned drone mission";
+      setCoords({ lat, lng });
+      setLocation(label);
+      setLocationQuery(label);
+      placePin(lat, lng);
+      mapInstanceRef.current?.flyTo({ center: [lng, lat], zoom: 15, speed: 1.2 });
+    } catch {
+      // Ignore malformed local drafts and leave the booking flow unchanged.
+    }
+  }, [mapReady, coords, placePin]);
+
   // Plot pilot markers whenever the database (or distance ordering) changes.
   useEffect(() => {
     const maplibregl = mapLibreRef.current;

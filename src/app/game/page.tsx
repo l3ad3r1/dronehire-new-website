@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "BOOK A DRONE NOW", href: "/book" },
   { label: "Airspace Map", href: "/map" },
+  { label: "Mission Planner", href: "/mission-planner" },
   { label: "Fly with us", href: "/pilots" },
 ];
 

@@ -25,7 +25,7 @@ function PlatformSection() {
         <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white mb-10">
           EVERYTHING YOU NEED IN ONE PLACE
         </h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <a href="/marketplace" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
             <div className="text-3xl mb-4">🛒</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
@@ -62,6 +62,19 @@ function PlatformSection() {
             </p>
             <span className="font-mono text-xs tracking-wider text-primary group-hover:underline">
               Start training →
+            </span>
+          </a>
+
+          <a href="/mission-planner" className="group border border-primary/40 bg-primary/5 p-8 hover:border-primary transition-colors block">
+            <div className="text-3xl mb-4">📍</div>
+            <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
+              MISSION PLANNER
+            </h3>
+            <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
+              Position drone photographs on a 3D Hyderabad map, configure camera angles, check airspace, and send the plan to a verified pilot.
+            </p>
+            <span className="font-mono text-xs tracking-wider text-primary group-hover:underline">
+              Plan a mission →
             </span>
           </a>
         </div>
