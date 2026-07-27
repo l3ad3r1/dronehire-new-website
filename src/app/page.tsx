@@ -39,16 +39,16 @@ function PlatformSection() {
             </span>
           </a>
 
-          <a href="/map" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
-            <div className="text-3xl mb-4">🗺️</div>
+          <a href="/mission-planner" className="group border border-primary/40 bg-primary/5 p-8 hover:border-primary transition-colors block">
+            <div className="text-3xl mb-4">📍</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
-              Live airspace map
+              DRONE MISSION PLANNER
             </h3>
             <p className="font-mono text-xs text-white/50 leading-relaxed mb-6">
-              Interactive map of all 55+ Indian airports and facilities with real DGCA red/yellow zone overlays. Check before you fly.
+              Position drone photographs on a 3D Hyderabad map, configure camera angles, check airspace, and send the plan to a verified pilot.
             </p>
             <span className="font-mono text-xs tracking-wider text-primary group-hover:underline">
-              Open airspace map →
+              Plan a mission →
             </span>
           </a>
 
@@ -64,6 +64,7 @@ function PlatformSection() {
               Start training →
             </span>
           </a>
+
         </div>
       </div>
     </section>
