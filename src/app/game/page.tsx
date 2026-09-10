@@ -67,7 +67,19 @@ export default function TrainingPage() {
     };
 
     window.addEventListener("message", handleSimulatorHeight);
-    return () => window.removeEventListener("message", handleSimulatorHeight);
+    const requestHeight = () =>
+      simulatorIframeRef.current?.contentWindow?.postMessage(
+        { type: "flight-lab:request-height" },
+        window.location.origin,
+      );
+    const requestFrame = window.requestAnimationFrame(requestHeight);
+    const retryRequest = window.setTimeout(requestHeight, 500);
+
+    return () => {
+      window.removeEventListener("message", handleSimulatorHeight);
+      window.cancelAnimationFrame(requestFrame);
+      window.clearTimeout(retryRequest);
+    };
   }, []);
 
   function scrollToSim() {
