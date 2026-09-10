@@ -87,6 +87,8 @@ let last=performance.now();function frame(now){requestAnimationFrame(frame);cons
  $('takeoffBtn').innerHTML=state.airborne?(state.auto==='land'?'× &nbsp; Cancel landing':'↓ &nbsp; Land <kbd>SPACE</kbd>'):'↑ &nbsp; Take off <kbd>SPACE</kbd>';$('homeBtn').textContent=state.auto==='return'?'× Cancel return':'⌂ Return home';$('takeoffBtn').disabled=paused;$('homeBtn').disabled=paused;
  for(const [side,x,y] of [['left',controls.yaw,-controls.up],['right',controls.right,-controls.forward]]){$(side+'Stick').querySelector('.stick-knob').style.transform=`translate(${x*$(side+'Stick').clientWidth*.33}px,${y*$(side+'Stick').clientWidth*.33}px)`;}mapDraw();
 }
+function reportFrameHeight(){if(window.parent===window)return;const main=document.querySelector('main');if(!main)return;const height=Math.ceil(main.getBoundingClientRect().height);window.parent.postMessage({type:'flight-lab:height',height},window.location.origin)}
+if(window.parent!==window){const frameMain=document.querySelector('main');if(frameMain&&'ResizeObserver'in window)new ResizeObserver(reportFrameHeight).observe(frameMain);window.addEventListener('load',reportFrameHeight);window.addEventListener('resize',reportFrameHeight);window.addEventListener('message',event=>{if(event.origin===window.location.origin&&event.data?.type==='flight-lab:request-height')reportFrameHeight()});document.fonts?.ready.then(reportFrameHeight);requestAnimationFrame(()=>requestAnimationFrame(reportFrameHeight))}
 renderLessons();try{initScene();requestAnimationFrame(frame);}catch(e){notify('The 3D field could not start. Open this folder in a browser with WebGL enabled.');console.error(e);}
 
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -47,6 +47,28 @@ const MODULES = [
 
 export default function TrainingPage() {
   const simulatorRef = useRef<HTMLDivElement>(null);
+  const simulatorIframeRef = useRef<HTMLIFrameElement>(null);
+  const [simulatorHeight, setSimulatorHeight] = useState(1100);
+
+  useEffect(() => {
+    const handleSimulatorHeight = (event: MessageEvent) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== simulatorIframeRef.current?.contentWindow ||
+        event.data?.type !== "flight-lab:height"
+      ) {
+        return;
+      }
+
+      const nextHeight = Number(event.data.height);
+      if (Number.isFinite(nextHeight) && nextHeight >= 600 && nextHeight <= 3000) {
+        setSimulatorHeight(Math.ceil(nextHeight));
+      }
+    };
+
+    window.addEventListener("message", handleSimulatorHeight);
+    return () => window.removeEventListener("message", handleSimulatorHeight);
+  }, []);
 
   function scrollToSim() {
     simulatorRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -142,11 +164,19 @@ export default function TrainingPage() {
       {/* Simulator */}
       <div ref={simulatorRef} className="bg-[#fafafa] scroll-mt-16">
         <iframe
+          ref={simulatorIframeRef}
           src="/flight-lab/index.html"
-          className="block h-[1950px] w-full border-0 sm:h-[1500px] lg:h-[1200px]"
+          className="block w-full border-0"
+          style={{ height: `${simulatorHeight}px` }}
           title="DroneHire Flight Lab — Mavic-style pilot trainer"
           allow="fullscreen"
           allowFullScreen
+          onLoad={() =>
+            simulatorIframeRef.current?.contentWindow?.postMessage(
+              { type: "flight-lab:request-height" },
+              window.location.origin,
+            )
+          }
         />
       </div>
 
