@@ -52,7 +52,7 @@ function PlatformSection() {
             </span>
           </a>
 
-          <a href="/game" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
+          <a href="/training" className="group border border-white/10 p-8 hover:border-primary transition-colors block">
             <div className="text-3xl mb-4">🎓</div>
             <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-white mb-3">
               DRONE TRAINING

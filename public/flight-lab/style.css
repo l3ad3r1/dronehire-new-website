@@ -42,5 +42,5 @@ dialog{border:0;border-top:4px solid #ff5500;box-shadow:0 25px 100px #0006;paddi
 .embedded{overflow:hidden;background:#fafafa}
 .embedded header,.embedded .page-title,.embedded footer{display:none}
 .embedded main{max-width:1280px;padding:0 24px;margin:0 auto}
-.embedded .controls{margin-bottom:24px}
+.embedded .controls{margin-top:18px;margin-bottom:18px;padding-top:26px;padding-bottom:20px}
 @media(max-width:520px){.embedded main{padding:0 15px}.embedded aside{display:block}.embedded aside h2,.embedded .intro,.embedded #lessonList,.embedded .coach,.embedded .free{display:block;grid-column:auto;grid-row:auto}.embedded .coach{margin-top:22px}.embedded .free{margin-top:10px}}

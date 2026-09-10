@@ -14,7 +14,7 @@ import { APPS_SCRIPT_URL } from "@/lib/config";
 const BOOK_NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Airspace Map", href: "/map" },
-  { label: "Drone Training", href: "/game" },
+  { label: "Drone Training", href: "/training" },
   { label: "Fly with us", href: "/pilots" },
 ];
 
