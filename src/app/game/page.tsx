@@ -14,34 +14,34 @@ const NAV_LINKS = [
 
 const MODULES = [
   {
-    icon: "🕹️",
-    title: "Flight fundamentals",
-    description: "Master takeoff, hover, yaw, pitch and roll in a forgiving 3D environment before touching a real aircraft.",
+    step: "01",
+    title: "Controlled takeoff",
+    description: "Start the motors and rise gently to two metres with automatic stabilisation.",
   },
   {
-    icon: "🗺️",
-    title: "Hyderabad airspace",
-    description: "Fly over a 3D replica of Hyderabad with live DGCA red and yellow zone overlays — know where you can and can't fly.",
+    step: "02",
+    title: "Stable hover",
+    description: "Hold altitude between three and five metres while GPS braking keeps the aircraft steady.",
   },
   {
-    icon: "📡",
-    title: "Live telemetry HUD",
-    description: "Real-time altitude, speed, battery, and GPS readouts mirroring the data displays on professional ground stations.",
+    step: "03",
+    title: "Yaw and orientation",
+    description: "Complete a full turn and learn how the aircraft nose changes your forward direction.",
   },
   {
-    icon: "🤖",
-    title: "AI tour guide",
-    description: "An in-sim AI explains DGCA regulations, restricted zones, and best-practice flight paths as you fly.",
+    step: "04",
+    title: "Beacon route",
+    description: "Combine pitch, roll, yaw and altitude to fly a short three-point training route.",
   },
   {
-    icon: "🎯",
-    title: "Scenario missions",
-    description: "Complete guided missions — real estate sweeps, wedding venue flyovers, construction site surveys — before doing them for real.",
+    step: "05",
+    title: "Safe landing",
+    description: "Return to the home pad, brake the aircraft and finish with a slow, controlled descent.",
   },
   {
-    icon: "📋",
-    title: "RPC exam prep",
-    description: "Airspace quizzes and knowledge checks aligned to the DGCA Remote Pilot Certificate syllabus.",
+    step: "∞",
+    title: "Free flight",
+    description: "Change camera views, add light wind and explore the field after completing the basics.",
   },
 ];
 
@@ -71,10 +71,10 @@ export default function TrainingPage() {
             DRONE<br /><span className="text-primary">TRAINING</span>
           </h1>
           <p className="text-lg text-white/60 max-w-xl mx-auto leading-relaxed mb-3">
-            Practice drone operations in a risk-free 3D environment built on Hyderabad's real airspace data.
+            Learn Mode 2 flight controls in a forgiving 3D training field before touching a real aircraft.
           </p>
           <p className="font-mono text-sm text-white/40 max-w-lg mx-auto leading-relaxed mb-10">
-            Build flight skills, learn DGCA airspace rules, and prepare for your Remote Pilot Certificate exam — before you ever lift off.
+            Five guided lessons teach takeoff, hover, orientation, navigation and landing — with live telemetry on every flight.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
@@ -83,7 +83,7 @@ export default function TrainingPage() {
             >
               START TRAINING →
             </button>
-            <span className="font-mono text-xs text-white/30 tracking-wide">WASD to fly · No signup needed</span>
+            <span className="font-mono text-xs text-white/30 tracking-wide">Keyboard + touch controls · No signup needed</span>
           </div>
         </div>
       </section>
@@ -101,7 +101,7 @@ export default function TrainingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {MODULES.map((m) => (
               <div key={m.title} className="border border-white/10 p-6 hover:border-primary/40 transition-colors">
-                <div className="text-3xl mb-4">{m.icon}</div>
+                <div className="font-mono text-xs tracking-[0.2em] text-primary mb-4">MODULE / {m.step}</div>
                 <h3 className="font-display text-sm font-bold tracking-[0.1em] uppercase text-white mb-2">
                   {m.title}
                 </h3>
@@ -121,10 +121,14 @@ export default function TrainingPage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { key: "W / S", action: "Pitch forward / back" },
-              { key: "A / D", action: "Roll left / right" },
-              { key: "Q / E", action: "Yaw left / right" },
-              { key: "↑ / ↓", action: "Throttle up / down" },
+              { key: "W / S", action: "Altitude up / down" },
+              { key: "A / D", action: "Turn left / right" },
+              { key: "ARROWS", action: "Move in any direction" },
+              { key: "SPACE", action: "Take off / land" },
+              { key: "P", action: "Pause / resume" },
+              { key: "C", action: "Change camera" },
+              { key: "R", action: "Reset flight" },
+              { key: "TOUCH", action: "Drag both sticks" },
             ].map(({ key, action }) => (
               <div key={key} className="border border-white/10 p-4 text-center">
                 <p className="font-mono text-sm font-bold text-primary mb-1">{key}</p>
@@ -136,11 +140,12 @@ export default function TrainingPage() {
       </section>
 
       {/* Simulator */}
-      <div ref={simulatorRef} style={{ height: "100vh" }}>
+      <div ref={simulatorRef} className="bg-[#fafafa] scroll-mt-16">
         <iframe
-          src="/drone-game.html"
-          style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-          title="DroneHire — 3D Drone Training Simulator"
+          src="/flight-lab/index.html"
+          className="block h-[1950px] w-full border-0 sm:h-[1500px] lg:h-[1200px]"
+          title="DroneHire Flight Lab — Mavic-style pilot trainer"
+          allow="fullscreen"
           allowFullScreen
         />
       </div>
